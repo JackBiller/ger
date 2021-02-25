@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Gerenciador de Projeto</title>
+	<link rel="stylesheet" href="../font-awesome/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../select2/dist/css/select2.min.css">
+	<link rel="stylesheet" href="../datatables.net/datatables.min.css">
+
+	<link rel="shortcut icon" href="../../../img/logo_mini.png" type="image/x-icon">
+
+	<script src="../jquery/dist/jquery.min.js"></script>
+	<script src="../moment/moment.js"></script>
+	<script src="../datatables.net/datatables.min.js"></script>
+	<script src="../select2/dist/js/select2.full.min.js"></script>
+	<script src="../bootstrap/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+	<div id="conteudo"></div>
+</div>
+</body>
+
+<script src="../../../js/scriptCofing.js"></script>
+<script src="../../../js/scriptGrade.js"></script>
+<script src="../resolv/resolvConfig.full.js"></script>
+<script src="../resolv/serealizeForm.js"></script>
+
+<script src="./scriptLogin.js"></script>
+<script src="./scriptCrud.js"></script>
+<script src="./scriptCrudForm.js"></script>
+<script src="./scriptCrudSubForm.js"></script>
+<script src="./scriptLib.js"></script>
+<script src="./scriptBd.js"></script>
+
+<script>
+
+var configMain_Global = { 
+	h2: { text: 'Gerenciador de Projetos' },
+	menu: { descForm: 'menuPrincipal', no_link: true, abas: [
+		{ text: 'Configurar Projeto', icon: 'gear'
+			, ctx: { row: [
+				{ div: { class: 'col-md-6' , id: 'formularioLogin' } },
+				{ div: { class: 'col-md-6' , id: 'formularioMenu' } },
+			] }
+		},
+		{ text: 'Gerar CRUD', icon: 'gear'
+			, ctx: { row: [
+				{ div: { class: 'col-md-6'		, id: 'formularioCadastro' 	} },
+				{ div: { classDiv: 'col-md-6'	, id: 'listaPaginas' 		} },
+				{ div: { class: 'col-md-12'		, id: 'colunasTabela' 
+					, style: { 'margin-top':'15px' }
+				} },
+				{ div: { class: 'col-md-12', id: 'subFormsDiv'
+					, style: { 'margin-top':'15px' }
+				} },
+			] }
+		},
+		{ text: 'Atualizar FTP', icon: 'gear'
+			, ctx: { row: [
+				{ input: { id: 'lastUpdateFtp', disabled: true 
+					, text: 'Última Atualização'
+					, style: { 'text-align':'right' }
+					, classDiv: 'col-md-6', styleDiv: { 'margin-top':'15px' }
+				} },
+			] }
+		},
+		{ text: 'Lib / Controller', icon: 'gear'
+			, ctx: { row: [
+				{ div: { class: 'col-md-6', ctx: [
+					{ button: { class: 'btn btn-info btn-block'
+						, desc: 'Setar Links Lib'
+						, click: () => { linksLibs(); }
+						, styleDiv: { 'margin-top':'15px' }
+					} },
+					{ div: { id: 'conteudoLibs' } },
+				] } },
+				{ div: { class: 'col-md-6', ctx: [
+					{ button: { class: 'btn btn-primary btn-block'
+						, desc: 'Setar Links do Controller'
+						, click: () => { linksController(); }
+						, styleDiv: { 'margin-top':'15px' }
+					} },
+					{ button: { class: 'btn btn-primary btn-block'
+						, desc: 'Setar Head e Footer das Views'
+						, click: () => { headFooterView(); }
+						, styleDiv: { 'margin-top':'15px' }
+					} },
+				] } },
+			] }
+		},
+		{ text: 'Gerar Script', icon: 'gear'
+			, ctx: { row: [
+				{ div: { class: 'col-md-6'	, id: 'formularioBd' 	} },
+				{ div: { class: 'col-md-12'	, id: 'camposCadastradosBd' 
+					, style: { 'margin-top':'15px' }
+				} },
+			] }
+		},
+	]
+} }
+$("#conteudo").html(resolvConfig(configMain_Global, 1, true));
+$("body").append(resolvConfigModal(configMain_Global));
+
+
+function salvarConfigProjeto() { 
+	var file = '../../../config.json'
+	, 	ctx = jsonToString(configJsonProjeto_Global,0,true);
+
+	ajax({
+		param: { 'gerarArquivo': true, file, ctx },
+		done: function(data) { 
+			console.log(data);
+			carregarConfig();
+		}
+	});
+}
+
+var usuario_Global = {};
+function salvarArquivo() { 
+	var file = 'config.json'
+	, 	ctx = jsonToString(configJson_Global,0,true);
+
+	ajax({
+		param: { 'gerarArquivo': true, file, ctx },
+		done: function(data) { 
+			console.log(data);
+			carregarConfig();
+		}
+	});
+}
+
+var configJsonProjeto_Global;
+var configJson_Global;
+var initComponet_Global = false;
+function carregarConfig() { 
+	$.getJSON("../../../config.json?" + (new Date()).toString(), function(data) { 
+		configJsonProjeto_Global = data;
+
+		$.getJSON("./config.json?" + (new Date()).toString(), function(data) { 
+			configJson_Global = data;
+			if (!initComponet_Global) { 
+				loadLib();
+				initFormCrud();
+				initFormBd();
+				initFormSubForm();
+				loadBlockCode();
+				initComponet_Global = true;
+			}
+			initFormLogin();
+			carregarTipSubForm();
+			montarGradePaginas();
+			if (((configJson_Global.ftp || {}).lastUpdate || '') != '') { 
+				$("#lastUpdateFtp").val(
+					moment(configJson_Global.ftp.lastUpdate).format('DD/MM/Y HH:mm:ss')
+				);
+			}
+		});
+	});
+}
+carregarConfig();
+
+
+
+
+
+
+var blockCodes_Global = [];
+var indiceBlockCodes_Global = 0;
+function loadBlockCode() { 
+	ajax({
+		param: { 'getListBlockCode': true },
+		done: function(data) { 
+			console.log(data);
+			data = JSON.parse(data);
+			console.log(data);
+
+			blockCodes_Global = data.branchs;
+			indiceBlockCodes_Global = 0;
+			percorrerBlockCode();
+		}
+	});
+}
+
+function percorrerBlockCode() { 
+	if (indiceBlockCodes_Global >= blockCodes_Global.length) return;
+
+	$.ajax({
+		url: './block-code/' + blockCodes_Global[indiceBlockCodes_Global].name,
+		dataType: 'text',
+	}).done(function(data) { 
+		blockCodes_Global[indiceBlockCodes_Global].name = 
+			blockCodes_Global[indiceBlockCodes_Global].name.substring(
+				0, blockCodes_Global[indiceBlockCodes_Global].name.lastIndexOf('.')
+			).toUpperCase();
+		blockCodes_Global[indiceBlockCodes_Global].ctx = data;
+		indiceBlockCodes_Global++;
+		percorrerBlockCode();
+	});
+}
+
+
+
+
+/* Estrutura AJAX */
+var processAjax_Global = false;
+function ajax(option) { 
+	// option.done = "var done = " + String(option.done || function(){}) + ";done(data);"
+	// option.erro = "var erro = " + String(option.erro || function(){ alert('Falha ao fazer a requisição!'); }) + ";"
+	registerAjaxFunc(() => { ajaxExecute(option) });
+}
+
+function ajaxExecute(option) { 
+	// console.log((option.param || {}));
+	console.log(option);
+	processAjax_Global = true;
+
+	if (typeof(option.erro) == 'function') { 
+		var erro = option.erro
+	} else {
+		eval(option.erro);
+	}
+
+	$.ajax({
+		  url: 		(option.url 		|| './controller.php')
+		, type: 	(option.type 		|| 'POST')
+		, dataType: (option.dataType 	|| 'text')
+		, data: 	$.extend({}, usuario_Global, (option.param || {}))
+		, error: 	erro
+	}).done(function (data) { 
+		processAjax_Global = false;
+		if (typeof(option.done) == 'function') { 
+			console.log('option.param');
+			console.log(option.param);
+			option.done(data, option.param);
+		} else { 
+			console.log('option.param');
+			console.log(option.param);
+			eval(option.done);
+		}
+	});
+}
+
+var funcListFila_Global = [];
+function registerAjaxFunc(code) { 
+	funcListFila_Global.push(code);
+}
+
+function observerAjaxFunc() { 
+	if (funcListFila_Global.length > 0 && !processAjax_Global) { 
+		try { 
+			if (funcListFila_Global[0] == 'string') { 
+				eval(funcListFila_Global[0]);
+			} else {
+				let func = funcListFila_Global[0];
+				func();
+			}
+		} catch(e) { 
+			console.error(e);
+		}
+		funcListFila_Global.splice(0,1);
+	}
+}
+setInterval(function() { observerAjaxFunc(); }, 100);
+
+</script>
+
+<!-- Modal -->
+<div class="modal fade" id="configuraCampo" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Configurar Campo <span id="infoConfigurarCampo"></span></h4>
+			</div>
+			<div class="modal-body">
+				<div id="conteudoConfigurarCampo"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-success" onclick="salvarConfiguraCampo()">
+					Salvar
+				</button>
+				&nbsp;&nbsp;&nbsp;
+				<button type="button" class="btn btn-default" data-dismiss="modal">
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="configuraItemMenu" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Item Menu <span id="infoItemMenu"></span></h4>
+			</div>
+			<div class="modal-body">
+				<div id="conteudoItemMenu"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-success" onclick="salvarItemMenuItem()">
+					Salvar
+				</button>
+				&nbsp;&nbsp;&nbsp;
+				<button type="button" class="btn btn-default" data-dismiss="modal">
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+</html>

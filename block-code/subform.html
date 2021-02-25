@@ -1,0 +1,127 @@
+
+<script>
+
+var configDESC_FORM_Global = { 
+	hr: { },
+	h3: { text: 'TITULO_PAGINA' },
+	menu: { descForm: 'menuDESC_FORM', no_link: true,
+		abas: [
+			{ text: 'Cadastro', icon: 'pencil', ctx: [
+				{ br: {} }
+				, { button: { class: 'btn btn-success btn-block', desc: 'Salvar', icon: 'floppy-o'
+					, click: () => { salvarDESC_FORM(); }, classDiv: 'col-md-3'
+				} }
+				, { button: { class: 'btn btn-primary btn-block', desc: 'Novo', icon: 'file'
+					, click: () => { novoDESC_FORM(); }, classDiv: 'col-md-3'
+				} }
+				, { button: { class: 'btn btn-warning btn-block', desc: 'Imprimir', icon: 'print'
+					, click: () => { imprimirDESC_FORM(); }, classDiv: 'col-md-3'
+				} }
+				, JSON_FORM_PAGINA 
+				, { br: {} }
+				, { menu: { descForm: 'subFormDESC_FORM', no_link: true
+					, classDiv: 'col-md-12'
+					, styleDiv: {
+						'border':'solid black 1px',
+						'margin-top':'15px',
+						'border-radius':'10px',
+						'display':'DISPLAY_SUBFORM'
+					}
+					, abas: ABAS_SUBFORM
+				} }
+			] },
+			{ text: 'Consulta', icon: 'list', ctx: {
+				div: { id: 'consultaDESC_FORM', style: { 'margin-top':'15px' } }
+			} },
+		]
+	}
+};
+$("#subFormDESC_FORM").html(resolvConfig(configDESC_FORM_Global, 1, true));
+
+function listarDESC_FORM(id='') { 
+	var PARAM_PAI_ID = resolvVal('PARAM_PAI_ID');
+
+	ajax({
+		param: { 'listarDESC_FORM': true, PARAM_PAI_ID },
+		done: function(data) { 
+			console.log(data);
+			data = JSON.parse(data);
+			console.log(data);
+
+			var grade = data[0].debug;
+			if (grade == 'OK') { 
+				grade = resolvGrade(data, {
+					inputs: [
+						JSON_INPUTS_CONSULTA,
+						{ head: '', align: 'center', tdClick: 'editarDESC_FORM'
+							, param: dt => resolvConfig({
+								button: { class: 'btn btn-warning', icon: 'pencil' }
+							})
+						},
+						{ head: '', align: 'center', tdClick: 'apagarDESC_FORM'
+							, param: dt => resolvConfig({
+								button: { class: 'btn btn-danger', icon: 'times' }
+							})
+						},
+					],
+					descForm: 'gradeDESC_FORM',
+					defaultAlignHead: 'center',
+					class: { tbody: { td: 'celB' } },
+					no_scrollX: true
+				});
+			}
+			$("#consultaDESC_FORM").html(grade);
+			if (id != '') editarDESC_FORM(data.find(dt => dt.PARAM_ID == id));
+		}
+	});
+}
+// listarDESC_FORM();
+
+var eventosSubFormDESC_FORM = [];
+function editarDESC_FORM(obj) { 
+	if (obj == undefined) return;
+	setForm(obj, configDESC_FORM_Global);
+	$("#menuDESC_FORM0")[0].click();
+	eventosSubFormDESC_FORM.forEach(function(e){ e(); });
+}
+
+function novoDESC_FORM() { 
+	clearForm(configDESC_FORM_Global);
+}
+
+function apagarDESC_FORM(obj) { 
+	if (!confirm('Deseja apagar registro?')) return;
+
+	ajax({
+		param: { 'apagarDESC_FORM': true, id: obj.PARAM_ID },
+		done: function(data) { 
+			console.log(data);
+			alert(data == 1 ? 'Registro apagado com sucesso' : 'Falha ao apagar: ' + data);
+		}
+	});
+}
+
+function salvarDESC_FORM() { 
+	var form = getForm(configDESC_FORM_Global);
+	if (!form) return;
+
+	var PARAM_PAI_ID = resolvVal('PARAM_PAI_ID');
+
+	var param = form.param
+	param.salvarDESC_FORM = true
+	param.PARAM_PAI_ID = PARAM_PAI_ID;
+
+	ajax({ param,
+		done: function(data) { 
+			alert(!isNaN(data) && data != 0 ? 'Salvo com sucesso!' : 'Falha ao salva: ' + data);
+			listarDESC_FORM(data);
+		}
+	})
+}
+
+function imprimirDESC_FORM() { 
+	
+}
+eventosSubFormDESC_PAI_FORM.push( function() { listarDESC_FORM(); } );
+</script>
+BLOCK_CODE_SUBFORM

@@ -1,0 +1,33 @@
+<?php
+
+/*
+	Constante: 
+		PATH_UPLOAD
+		CAMPO_REF
+		DESC_FORM
+*/
+
+if (!empty($_POST['uploadStartCAMPO_REF_DESC_FORM'])) { 
+	$temp = date('YmdHis') . (string) rand(10,99);
+	createFile($temp, '');
+	echo $temp;
+}
+
+if (!empty($_POST['uploadProgressCAMPO_REF_DESC_FORM'])) { 
+	$temp = $_POST['temp'];
+	$base64 = $_POST['base64'];
+	$ctx = ctxFile($temp).$base64;
+	deleteFile($temp);
+	createFile($temp, $ctx);
+}
+
+if (!empty($_POST['uploadFinishCAMPO_REF_DESC_FORM'])) { 
+	$temp = $_POST['temp'];
+	$nome = $_POST['nome'];
+	$ext = $_POST['ext'];
+	$ctx = ctxFile($temp);
+	deleteFile($temp);
+	createFile('PATH_UPLOAD' . $nome . '.' . $ext, base64_decode($ctx));
+}
+
+?>

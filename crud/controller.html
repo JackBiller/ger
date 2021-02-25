@@ -1,0 +1,50 @@
+<?php
+
+if (!empty($_POST['salvarDESC_FORM'])) { 
+	VAR_FORM;
+
+	if (empty($_POST['PARAM_ID'])) { 
+		$sql = "INSERT INTO TABELA_BD (
+					CAMPOS_CADASTRO
+				) VALUES (
+					VALUES_CADASTRO
+				)";
+		// printQuery($sql);
+		$id = padraoExecute($pdo, $sql, true);
+	} else {
+		$id = $_POST['PARAM_ID'];
+		$sql = "UPDATE TABELA_BD
+				SET CAMPOS_UPDATE
+				WHERE PARAM_ID = $id";
+		// printQuery($sql);
+		padraoExecute($pdo, $sql, false);
+	}
+	echo $id;
+}
+
+if (!empty($_POST['listarDESC_FORM'])) { 
+	$sql = "SELECT 
+				CAMPOS_SELECT
+			FROM TABELA_BD INNER_JOIN_SELECT
+			WHERE 1 = 1 AND_INATIVO";
+	// printQuery($sql);
+	echo toJson(padraoResultado($pdo, $sql, 'Nenhum resultado encontrado!'));
+}
+
+if (!empty($_POST['apagarDESC_FORM'])) { 
+	$id = $_POST['id'];
+
+	if (SET_INATIVO) { 
+		$sql = "UPDATE TABELA_BD
+				SET CAMPO_INATIVO = 1
+				WHERE PARAM_ID = $id";
+	} else { 
+		$sql = "DELETE FROM TABELA_BD
+				WHERE PARAM_ID = $id";
+	}
+	// printQuery($sql);
+	echo padraoExecute($pdo, $sql, false);
+}
+
+?>
+BLOCK_CODE_CONTROLLER

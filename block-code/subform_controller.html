@@ -1,0 +1,57 @@
+<?php
+
+if (!empty($_POST['salvarDESC_FORM'])) { 
+	VAR_FORM;
+	$PARAM_PAI_ID = $_POST['PARAM_PAI_ID'];
+
+	if (empty($_POST['PARAM_ID'])) { 
+		$sql = "INSERT INTO TABELA_BD (
+					CAMPOS_CADASTRO, PARAM_SUBFORM
+				) VALUES (
+					VALUES_CADASTRO, $PARAM_PAI_ID
+				)";
+		// printQuery($sql);
+		$id = padraoExecute($pdo, $sql, true);
+	} else {
+		$id = $_POST['PARAM_ID'];
+		$sql = "UPDATE TABELA_BD
+				SET CAMPOS_UPDATE
+				, 	PARAM_SUBFORM = $PARAM_PAI_ID
+				WHERE PARAM_ID = $id";
+		// printQuery($sql);
+		padraoExecute($pdo, $sql, false);
+	}
+	echo $id;
+}
+
+if (!empty($_POST['listarDESC_FORM'])) { 
+	$PARAM_PAI_ID = $_POST['PARAM_PAI_ID'];
+
+	$sql = "SELECT 
+				CAMPOS_SELECT
+				, TABELA_PAI_BD.PARAM_PAI_ID
+			FROM TABELA_BD INNER_JOIN_SELECT
+			INNER JOIN TABELA_PAI_BD ON TABELA_PAI_BD.PARAM_PAI_ID = TABELA_BD.PARAM_SUBFORM
+			WHERE 1 = 1 AND_INATIVO
+			AND TABELA_PAI_BD.PARAM_PAI_ID = $PARAM_PAI_ID";
+	// printQuery($sql);
+	echo toJson(padraoResultado($pdo, $sql, 'Nenhum resultado encontrado!'));
+}
+
+if (!empty($_POST['apagarDESC_FORM'])) { 
+	$id = $_POST['id'];
+
+	if (SET_INATIVO) { 
+		$sql = "UPDATE TABELA_BD
+				SET CAMPO_INATIVO = 1
+				WHERE PARAM_ID = $id";
+	} else { 
+		$sql = "DELETE TABELA_BD
+				WHERE PARAM_ID = $id";
+	}
+	// printQuery($sql);
+	echo padraoExecute($pdo, $sql, false);
+}
+
+?>
+BLOCK_CODE_CONTROLLER

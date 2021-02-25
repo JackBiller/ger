@@ -1,0 +1,21 @@
+<?php
+
+/*
+	Constante: 
+		CAMPO_REF
+		DESC_FORM
+		CAMPOS_SELECT
+		TABELA_BD
+		AND_INATIVO
+*/
+
+if (!empty($_POST['codigoCAMPO_REF_DESC_FORM'])) { 
+	$sql = "SELECT 
+				CAMPOS_SELECT
+			FROM TABELA_BD
+			WHERE 1 = 1 AND_INATIVO";
+	// printQuery($sql);
+	echo toJson(padraoResultado($pdo, $sql, 'Nenhum resultado encontrado!'));
+}
+
+?>

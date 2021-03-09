@@ -2,12 +2,12 @@
 
 date_default_timezone_set('America/Sao_Paulo');
 
-include './class/conexao.php';
-$conn = new Conexao();
-$pdo = $conn->Connect();
 
-include './class/entidade/PadraoObjeto.php';
-include '../../../controller/funcoes.php';
+include 'funcoes.php';
+// $conn = new Conexao();
+// $pdo = $conn->Connect();
+$pdo = getConection('./config.env');
+
 
 $config = json_decode(file_get_contents("./config.env"));
 $db_nome = $config->db_nome;
@@ -33,6 +33,19 @@ if (!empty($_POST['carregarCampos'])) {
 	// printQuery($sql);
 	echo toJson(padraoResultado($pdo, $sql, 'Nenhum resultado encontrado!'));
 }
+
+
+
+/****************************************************************************************/
+/* Gerenciador de Projetos */
+/****************************************************************************************/
+if (!empty($_POST['abrir_projeto'])) { 
+	$path_root = empty($_POST['path_root']) ? 'D:\CDI Web\PHP\\' : $_POST['path_root'];
+	$path = empty($_POST['path']) ? 'OrdemServico' : $_POST['path'];
+	shell_exec('cd ' . $path_root . '/' . $path . ' && code .');
+	echo 'cd ' . $path_root . '/' . $path . ' && code .';
+}
+
 
 
 

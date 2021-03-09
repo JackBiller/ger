@@ -1,0 +1,15 @@
+{
+	"projetos": [
+		{
+			"nome": "Nome",
+			"path": "caminho/admin"
+		}
+	],
+	"path_root": "C:/xampp/htdocs/",
+	"resolv": {
+		"path": "RESOLV"
+	},
+	"classSQL": {
+		"path": "ClassSQL"
+	}
+}

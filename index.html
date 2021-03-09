@@ -40,6 +40,11 @@
 var configMain_Global = { 
 	h2: { text: 'Gerenciador de Projetos' },
 	menu: { descForm: 'menuPrincipal', no_link: true, abas: [
+		{ text: 'Instalar Projeto', icon: 'gear'
+			, ctx: { row: [
+				{ div: { class: 'col-md-12' , id: 'formularioProjetos' } },
+			] }
+		},
 		{ text: 'Configurar Projeto', icon: 'gear'
 			, ctx: { row: [
 				{ div: { class: 'col-md-6' , id: 'formularioLogin' } },
@@ -135,7 +140,7 @@ function salvarArquivo() {
 var configJsonProjeto_Global;
 var configJson_Global;
 var initComponet_Global = false;
-function carregarConfig() { 
+function carregarConfigApp() { 
 	$.getJSON("../../../config.json?" + (new Date()).toString(), function(data) { 
 		configJsonProjeto_Global = data;
 
@@ -158,6 +163,40 @@ function carregarConfig() {
 				);
 			}
 		});
+	});
+}
+
+function carregarConfig() { 
+	$.getJSON('./config.json', function(data) { 
+		console.log(data);
+		$("#formularioProjetos").html(resolvConfig([
+			{
+				div: {
+					class: 'col-md-6',
+					text: ''
+						+ 	'<h2>Projetos</h2>'
+						+ 	'<table class="table" border="1">'
+						+ data.projetos.map(proj => ''
+							+ 	'<tr>'
+							+ 		'<td>' + proj.nome + '</td>'
+							+ 		'<td algin="right" style="padding:5px;" width="10px">'
+							+ 			'<button class="btn btn-info">'
+							+ 				'<i class="fa fa-eye"></i>'
+							+ 			'</button>'
+							+ 		'</td>'
+							+ 		'<td algin="right" style="padding:5px;" width="10px">'
+							+ 			'<button class="btn btn-primary"'
+							+ 				' onclick="openCode(\''+proj.path+'\',\''+data.path_root+'\');"'
+							+ 			'>'
+							+ 				'<i class="fa fa-code"></i>'
+							+ 			'</button>'
+							+ 		'</td>'
+							+ 	'</tr>'
+						).join('')
+						+ 	'</table>'
+				}
+			}
+		]))
 	});
 }
 carregarConfig();
@@ -264,6 +303,19 @@ function observerAjaxFunc() {
 	}
 }
 setInterval(function() { observerAjaxFunc(); }, 100);
+
+
+function openCode(path='',path_root='') { 
+	$.ajax({
+		url: './controller.php',
+		type: 'POST',
+		dataType: 'text',
+		data: { 'abrir_projeto': true, path, path_root },
+		error: function() { alert('Falha ao fazer a requisição!'); }
+	}).done(function(data) { 
+		console.log(data);
+	});
+}
 
 </script>
 

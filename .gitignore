@@ -2,5 +2,8 @@
 *.env
 *.json
 !configTemplate.json
+!composer.json
 
 resolvConfig.full.js
+
+/vendor/

@@ -2,6 +2,8 @@
 
 date_default_timezone_set('America/Sao_Paulo');
 
+include './vendor/autoload.php';
+
 include 'funcoes.php';
 
 /****************************************************************************************/
@@ -57,6 +59,7 @@ if (!empty($_POST['instalar_projeto'])) {
 	installDir($path, $path_admin, '/script');
 
 	installFile($path, $path_admin, '/controller/include.php'	);
+	installFile($path, $path_admin, '/create-user/form.php'		);
 	installFile($path, $path_admin, '/create-user/form.js'		);
 	installFile($path, $path_admin, '/config.json'				);
 	installFile($path, $path_admin, '/config.env'				);
@@ -81,6 +84,7 @@ if (!empty($_POST['atualizarOrigemRepo'])) {
 	installDir($path_admin, $path, '/script');
 
 	installFile($path_admin, $path, '/controller/include.php'	);
+	installFile($path_admin, $path, '/create-user/form.php'		);
 	installFile($path_admin, $path, '/create-user/form.js'		);
 	installFile($path_admin, $path, '/config.json'				);
 	installFile($path_admin, $path, '/config.env'				);

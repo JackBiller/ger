@@ -1,10 +1,6 @@
 
-
-controller/congig/*
-script/*
-img/*
-view/*
-
 *.env
 *.json
 !configTemplate.json
+
+resolvConfig.full.js

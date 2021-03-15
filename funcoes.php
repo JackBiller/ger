@@ -459,8 +459,8 @@ function ctxFile($file) {
 	return $ctx;
 }
 
-function copyFile($orign, $dist) { 
-	$file = ctxFile($orign);
+function copyFile($origin, $dist) { 
+	$file = ctxFile($origin);
 	return createFile($dist, $file);
 }
 
@@ -500,6 +500,52 @@ function listDir($path) {
 		$dir->set('Not Dir', 'name');
 	}
 	return $dir;
+}
+
+function copyDir($dirOrigin, $dirDist) { 
+	if (is_dir($dirOrigin)) { 
+		if (!is_dir($dirDist)) mkdir($dirDist);
+
+		$objects = scandir($dirOrigin);
+		foreach ($objects as $object) { 
+			if ($object != '.' && $object != '..') { 
+				if (is_dir($dirOrigin . DIRECTORY_SEPARATOR . $object)) { 
+					mkdir($dirDist . DIRECTORY_SEPARATOR . $object);
+					copyDir(
+						$dirOrigin . DIRECTORY_SEPARATOR . $object, 
+						$dirDist . DIRECTORY_SEPARATOR . $object
+					);
+				} else if (is_file($dirOrigin . DIRECTORY_SEPARATOR . $object)) { 
+					copyFile(
+						$dirOrigin . DIRECTORY_SEPARATOR . $object, 
+						$dirDist . DIRECTORY_SEPARATOR . $object
+					);
+				}
+			}
+		}
+	}
+}
+
+function removeDir($dir) { 
+	if (is_dir($dir)) { 
+		$objects = scandir($dir);
+		foreach ($objects as $object) { 
+			if ($object != '.' && $object != '..') { 
+				if (is_dir($dir . DIRECTORY_SEPARATOR . $object)) { 
+					removeDir($dir . DIRECTORY_SEPARATOR . $object);
+				} else if (is_file($dir . DIRECTORY_SEPARATOR . $object)) { 
+					if (!unlink($dir . DIRECTORY_SEPARATOR . $object)) { 
+						// code in case the file was not removed
+					}
+					// wait a bit here?
+				} else { 
+					// code for debug file permission issues
+				}
+			}
+		}
+		reset($objects);
+		rmdir($dir);
+	}
 }
 
 function deleteFile($file) { 

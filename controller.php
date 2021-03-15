@@ -2,12 +2,7 @@
 
 date_default_timezone_set('America/Sao_Paulo');
 
-
 include 'funcoes.php';
-// $conn = new Conexao();
-// $pdo = $conn->Connect();
-$pdo = getConection('./config.env');
-
 
 $config = json_decode(file_get_contents("./config.env"));
 $db_nome = $config->db_nome;
@@ -16,6 +11,7 @@ $db_nome = $config->db_nome;
 /* Operações Banco de Dados */
 /****************************************************************************************/
 if (!empty($_POST['buscarTabela'])) { 
+	$pdo = getConection();
 	$tabela = empty($_POST['tabela']) ? '' : "AND TABLE_NAME = '" . $_POST['tabela'] . "'";
 
 	$sql = "SELECT 
@@ -28,6 +24,7 @@ if (!empty($_POST['buscarTabela'])) {
 }
 
 if (!empty($_POST['carregarCampos'])) { 
+	$pdo = getConection();
 	$tabelaBd = $_POST['tabelaBd'];
 	$sql = "SHOW COLUMNS FROM $tabelaBd;";
 	// printQuery($sql);
@@ -40,12 +37,77 @@ if (!empty($_POST['carregarCampos'])) {
 /* Gerenciador de Projetos */
 /****************************************************************************************/
 if (!empty($_POST['abrir_projeto'])) { 
-	$path_root = empty($_POST['path_root']) ? 'D:\CDI Web\PHP\\' : $_POST['path_root'];
-	$path = empty($_POST['path']) ? 'OrdemServico' : $_POST['path'];
+	$path_root = empty($_POST['path_root']) ? 'C:/xampp/htdocs/' : $_POST['path_root'];
+	$path = empty($_POST['path']) ? '' : $_POST['path'];
 	shell_exec('cd ' . $path_root . '/' . $path . ' && code .');
 	echo 'cd ' . $path_root . '/' . $path . ' && code .';
 }
 
+if (!empty($_POST['instalar_projeto'])) { 
+	$path_root = empty($_POST['path_root']) ? 'C:/xampp/htdocs/' : $_POST['path_root'];
+	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
+	$path = empty($_POST['path']) ? '' : $_POST['path'];
+
+	removeDir('../'.$path_admin.'/img');
+	copyDir('img', '../' . $path_admin . '/img');
+	copyDir('../' . $path . '/img', '../' . $path_admin . '/img');
+
+	installDir($path, $path_admin, '/view');
+	installDir($path, $path_admin, '/controller/config');
+	installDir($path, $path_admin, '/script');
+
+	installFile($path, $path_admin, '/controller/include.php'	);
+	installFile($path, $path_admin, '/create-user/form.js'		);
+	installFile($path, $path_admin, '/config.json'				);
+	installFile($path, $path_admin, '/config.env'				);
+
+	echo '1';
+}
+function installDir($path, $path_admin, $comp) { 
+	removeDir('../' . $path_admin . $comp);
+	copyDir('../' . $path . $comp, '../' . $path_admin . $comp);
+}
+function installFile($path, $path_admin, $comp) { 
+	copyFile('../' . $path . $comp, '../' . $path_admin . $comp);
+}
+
+if (!empty($_POST['atualizarOrigemRepo'])) { 
+	$path_root = empty($_POST['path_root']) ? 'C:/xampp/htdocs/' : $_POST['path_root'];
+	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
+	$path = empty($_POST['path']) ? '' : $_POST['path'];
+
+	installDir($path_admin, $path, '/view');
+	installDir($path_admin, $path, '/controller/config');
+	installDir($path_admin, $path, '/script');
+
+	installFile($path_admin, $path, '/controller/include.php'	);
+	installFile($path_admin, $path, '/create-user/form.js'		);
+	installFile($path_admin, $path, '/config.json'				);
+	installFile($path_admin, $path, '/config.env'				);
+
+	echo '1';
+}
+
+if (!empty($_POST['checkUpResolv'])) { 
+	$path = $_POST['path'];
+	$path_admin = $_POST['path_admin'];
+
+	$filObj = getObjFile('resolvConfig.full.js','../' . $path);
+	$diff = date_diff( date_create(date('Y-m-d H:i:s')), date_create($filObj->get('dateCriation')) );
+	if ($diff->y == 0 && $diff->m == 0 && $diff->d == 0 && $diff->h == 0 && $diff->i == 0 && $diff->s < 3) {
+		$_POST['installResolv'] = true;
+	}
+}
+
+if (!empty($_POST['installResolv'])) { 
+	$path = $_POST['path'];
+	$path_admin = $_POST['path_admin'];
+
+	copyFile('../' . $path . '/resolvConfig.full.js', '../' . $path_admin . '/js/resolvConfig.full.js');
+	copyFile('../' . $path . '/resolvConfig.full.js', './resolvConfig.full.js');
+
+	echo '1';
+}
 
 
 

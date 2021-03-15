@@ -9,8 +9,6 @@
 	<link rel="stylesheet" href="./biblioteca/select2/dist/css/select2.min.css">
 	<link rel="stylesheet" href="./biblioteca/datatables.net/datatables.min.css">
 
-	<link rel="shortcut icon" href="../../../img/logo_mini.png" type="image/x-icon">
-
 	<script src="./biblioteca/jquery/dist/jquery.min.js"></script>
 	<script src="./biblioteca/moment/moment.js"></script>
 	<script src="./biblioteca/datatables.net/datatables.min.js"></script>
@@ -23,10 +21,7 @@
 </div>
 </body>
 
-<!-- <script src="../../../js/scriptCofing.js"></script>
-<script src="../../../js/scriptGrade.js"></script> -->
-<script src="../resolv/resolvConfig.full.js"></script>
-<script src="../resolv/serealizeForm.js"></script>
+<script src="./resolvConfig.full.js"></script>
 
 <script src="./scriptLogin.js"></script>
 <script src="./scriptCrud.js"></script>
@@ -42,6 +37,22 @@ var configMain_Global = {
 	menu: { descForm: 'menuPrincipal', no_link: true, abas: [
 		{ text: 'Instalar Projeto', icon: 'gear'
 			, ctx: { row: [
+				{ button: {
+					desc: 'Admin Código', id: 'btnOpenAdmin', class: 'btn btn-block btn-primary', icon: 'code'
+					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3'
+				} },
+				{ button: {
+					desc: 'Admin Browser', click: function() { viewProject(); }, class: 'btn btn-block btn-info', icon: 'eye'
+					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3'
+				} },
+				{ button: {
+					desc: 'Resolv Código', id: 'btnOpenResolv', class: 'btn btn-block btn-primary', icon: 'code'
+					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3'
+				} },
+				{ button: {
+					desc: 'Resolv Install', click: function() { installResolv(); }, class: 'btn btn-block btn-warning', icon: 'download'
+					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3'
+				} },
 				{ div: { class: 'col-md-12' , id: 'formularioProjetos' } },
 			] }
 		},
@@ -166,43 +177,80 @@ function carregarConfigApp() {
 	});
 }
 
+var configJsonGeral_Global;
+var projetoInstalado_Global;
 function carregarConfig() { 
 	$.getJSON('./config.json', function(data) { 
 		console.log(data);
+
+		configJsonGeral_Global = data;
+
+		$("#btnOpenAdmin")[0].onclick = function() {
+			openCode(data.path_admin, data.path_root);
+		}
+
+		$("#btnOpenResolv")[0].onclick = function() {
+			openCode(data.resolv.path, data.path_root);
+		}
+
 		$("#formularioProjetos").html(resolvConfig([
-			{
-				div: {
-					class: 'col-md-6',
-					text: ''
-						+ 	'<h2>Projetos</h2>'
-						+ 	'<table class="table" border="1">'
-						+ data.projetos.map(proj => ''
-							+ 	'<tr>'
-							+ 		'<td>' + proj.nome + '</td>'
-							+ 		'<td algin="right" style="padding:5px;" width="10px">'
-							+ 			'<button class="btn btn-info">'
-							+ 				'<i class="fa fa-eye"></i>'
-							+ 			'</button>'
-							+ 		'</td>'
-							+ 		'<td algin="right" style="padding:5px;" width="10px">'
-							+ 			'<button class="btn btn-primary"'
-							+ 				' onclick="openCode(\''+proj.path+'\',\''+data.path_root+'\');"'
-							+ 			'>'
-							+ 				'<i class="fa fa-code"></i>'
-							+ 			'</button>'
-							+ 		'</td>'
-							+ 	'</tr>'
-						).join('')
-						+ 	'</table>'
+			{ div: { 
+				class: 'col-md-8',
+				text: ''
+					+ 	'<h2>Projetos</h2>'
+					+ ((data.projetos || []).length == 0 ? 'Nenhum projeto configurado!' : ''
+						+ resolvGrade(data.projetos, {
+							inputs: [
+								{ head: 'Nome Projeto', param: 'nome' },
+								{ head: 'Instalar', align: 'center'
+									, param: function(proj) { 
+										return ''
+											+ 	'<button class="btn btn-warning" title="Instalar"'
+											+ 		' onclick="installProject(\''+proj.nome+'\',\''+proj.path+'\')"'
+											+ 	'>'
+											+ 		'<i class="fa fa-download"></i>'
+											+ 	'</button>'
+									}
+								},
+								{ head: 'VS Code', align: 'center'
+									, style: { thead: { td: { "white-space":"nowrap" } } } 
+									, param: function(proj) { 
+										return ''
+											+ 	'<button class="btn btn-primary" title="Abrir Visual Studio Code"'
+											+ 		' onclick="openCode(\''+proj.path+'\');"'
+											+ 	'>'
+											+ 		'<i class="fa fa-code"></i>'
+											+ 	'</button>'
+									}
+								}
+							],
+							descForm: 'projetos'
+						})
+					)
+					+ 	'<div id="projetoInstalado"></div>'
+			} },
+			{ div: { class: 'col-md-4', ctx: { 
+				h2: { text: 'Resolv' },
+				menu: { descForm: 'menuResolv', no_link: true
+					, abas: [
+						{ text: 'Bot Resolv', ctx: [
+							{ div: { style: { 'margin-top': '10px' }
+								, text: ''
+									+ 	'<iframe src="../'+data.resolv.path+'/botResolv.html"'
+									+ 		' width="100%" height="560px"'
+									+ 	'></iframe>'
+							} }
+						] },
+					]
 				}
-			}
-		]))
+			} } }
+		]));
+
+		resolvProjetoInstalado();
+		checkUpResolv();
 	});
 }
 carregarConfig();
-
-
-
 
 
 
@@ -241,8 +289,6 @@ function percorrerBlockCode() {
 }
 
 
-
-
 /* Estrutura AJAX */
 var processAjax_Global = false;
 function ajax(option) { 
@@ -253,12 +299,12 @@ function ajax(option) {
 
 function ajaxExecute(option) { 
 	// console.log((option.param || {}));
-	console.log(option);
+	if ((option.no_console || '') == '') console.log(option);
 	processAjax_Global = true;
 
 	if (typeof(option.erro) == 'function') { 
 		var erro = option.erro
-	} else {
+	} else { 
 		eval(option.erro);
 	}
 
@@ -271,12 +317,12 @@ function ajaxExecute(option) {
 	}).done(function (data) { 
 		processAjax_Global = false;
 		if (typeof(option.done) == 'function') { 
-			console.log('option.param');
-			console.log(option.param);
+			if ((option.no_console || '') == '') console.log('option.param');
+			if ((option.no_console || '') == '') console.log(option.param);
 			option.done(data, option.param);
 		} else { 
-			console.log('option.param');
-			console.log(option.param);
+			if ((option.no_console || '') == '') console.log('option.param');
+			if ((option.no_console || '') == '') console.log(option.param);
 			eval(option.done);
 		}
 	});
@@ -305,18 +351,98 @@ function observerAjaxFunc() {
 setInterval(function() { observerAjaxFunc(); }, 100);
 
 
-function openCode(path='',path_root='') { 
-	$.ajax({
-		url: './controller.php',
-		type: 'POST',
-		dataType: 'text',
-		data: { 'abrir_projeto': true, path, path_root },
-		error: function() { alert('Falha ao fazer a requisição!'); }
-	}).done(function(data) { 
-		console.log(data);
+function openCode(path='') { 
+	ajax({
+		param: { 'abrir_projeto': true, path, 
+			path_root: configJsonGeral_Global.path_root
+		},
+		error: function() { alert('Falha ao fazer a requisição!'); },
+		done: function(data) { 
+			console.log(data);
+		}
 	});
 }
 
+function viewProject() { 
+	window.open('../' + configJsonGeral_Global.path_admin, '_blank');
+}
+
+function installResolv() { 
+	ajax({
+		param: { 
+			'installResolv': true, 
+			path: configJsonGeral_Global.resolv.path, 
+			path_admin: configJsonGeral_Global.path_admin, 
+		},
+		done: function(data) { 
+			console.log(data);
+			alert(data == '1' ? 'Resolv Instalado com sucesso!' : 'Falha ao instalar resolv: ' + data);
+		}
+	});
+}
+
+function installProject(nome, path='') { 
+	ajax({
+		param: { 'instalar_projeto': true, path, 
+			path_admin: configJsonGeral_Global.path_admin,
+		},
+		error: function() { alert('Falha ao fazer a requisição!'); },
+		done: function(data) { 
+			console.log(data);
+			alert(data == '1' ? 'Projeto instalado com sucesso' : 'Falha ao instalar projeto: ' + data);
+			localStorage.setItem('projeto', JSON.stringify({ 
+				nome, path, data: moment().format('Y-MM-DD HH:mm:ss')
+				, dataForm: moment().format('DD/MM/Y HH:mm:ss')
+			}));
+			resolvProjetoInstalado();
+		}
+	});
+}
+
+function resolvProjetoInstalado() { 
+	if (localStorage.projeto) { 
+		projetoInstalado_Global = JSON.parse(localStorage.getItem('projeto'));
+
+		$("#projetoInstalado").html(resolvConfig({
+			br: {  },
+			h2: { text: '<b>Projeto Instalado: </b>' + projetoInstalado_Global.nome },
+			h3: { text: '<b>Data Instalação: </b>' + projetoInstalado_Global.dataForm },
+			button: { 
+				desc: 'Atualizar Origem', icon: 'refresh', class: 'btn btn-primary',
+				click: function() { atualizarOrigemRepo(); }
+			}
+		}));
+	}
+}
+
+function atualizarOrigemRepo() { 
+	ajax({
+		param: { 
+			'atualizarOrigemRepo': true, 
+			path: projetoInstalado_Global.path, 
+			path_admin: configJsonGeral_Global.path_admin,
+		},
+		done: function(data) { 
+			console.log(data);
+			alert(data == '1' ? 'Atualizado com sucesso!' : 'Falha ao atualizar: ' + data);
+		}
+	});
+}
+
+function checkUpResolv() { 
+	ajax({ 
+		param: { 
+			'checkUpResolv': true, 
+			path: configJsonGeral_Global.resolv.path, 
+			path_admin: configJsonGeral_Global.path_admin, 
+		},
+		error: function () { console.log('Falha ao atualizar checkUpResolv!'); },
+		done: function(data) { 
+			setTimeout(function() { checkUpResolv(); }, 300);
+		},
+		no_console: 'true'
+	});
+}
 </script>
 
 <!-- Modal -->

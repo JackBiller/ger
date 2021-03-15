@@ -5,7 +5,9 @@
 			"path": "caminho/admin"
 		}
 	],
+	"path_admin": "ADMIN",
 	"path_root": "C:/xampp/htdocs/",
+	"serverName": "localhost",
 	"resolv": {
 		"path": "RESOLV"
 	},

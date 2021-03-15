@@ -4,15 +4,15 @@ date_default_timezone_set('America/Sao_Paulo');
 
 include 'funcoes.php';
 
-$config = json_decode(file_get_contents("./config.env"));
-$db_nome = $config->db_nome;
-
 /****************************************************************************************/
 /* Operações Banco de Dados */
 /****************************************************************************************/
 if (!empty($_POST['buscarTabela'])) { 
 	$pdo = getConection();
 	$tabela = empty($_POST['tabela']) ? '' : "AND TABLE_NAME = '" . $_POST['tabela'] . "'";
+
+	$config = json_decode(file_get_contents("./config.env"));
+	$db_nome = $config->db_nome;
 
 	$sql = "SELECT 
 				TABLE_NAME AS DS_TABELA 
@@ -189,6 +189,8 @@ if (!empty($_POST['limparProjeto'])) {
 if (!empty($_POST['verificarDir'])) { 
 	$dir = $_POST['dir'];
 	$is_connect = false;
+
+	$config = json_decode(file_get_contents("./config.env"));
 
 	$ftp_host 		= $config->ftp_host;
 	$ftp_user_name 	= $config->ftp_user_name;

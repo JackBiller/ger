@@ -408,8 +408,9 @@ function resolvProjetoInstalado() {
 			h2: { text: '<b>Projeto Instalado: </b>' + projetoInstalado_Global.nome },
 			h3: { text: '<b>Data Instalação: </b>' + projetoInstalado_Global.dataForm },
 			button: { 
-				desc: 'Atualizar Origem', icon: 'refresh', class: 'btn btn-primary',
-				click: function() { atualizarOrigemRepo(); }
+				desc: 'Mesclar Diretórios da Instalação', icon: 'refresh', class: 'btn btn-primary',
+				click: function() { atualizarOrigemRepo(); },
+				title: 'Vai abrir os diretórios view e controller/config, depois verificar o que foi alterado por último',
 			}
 		}));
 	}

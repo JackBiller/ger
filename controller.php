@@ -66,12 +66,20 @@ if (!empty($_POST['instalar_projeto'])) {
 
 	echo '1';
 }
-function installDir($path, $path_admin, $comp) { 
-	removeDir('../' . $path_admin . $comp);
-	copyDir('../' . $path . $comp, '../' . $path_admin . $comp);
+function installDir($path, $path_admin, $comp, $isMerge=false) { 
+	if ($isMerge) { 
+		mergeDir('../' . $path . $comp, '../' . $path_admin . $comp);
+	} else { 
+		removeDir('../' . $path_admin . $comp);
+		copyDir('../' . $path . $comp, '../' . $path_admin . $comp);
+	}
 }
-function installFile($path, $path_admin, $comp) { 
-	copyFile('../' . $path . $comp, '../' . $path_admin . $comp);
+function installFile($path, $path_admin, $comp, $isMerge=false) { 
+	if ($isMerge) { 
+		mergeFile('../' . $path, '../' . $path_admin, $comp);
+	} else { 
+		copyFile('../' . $path . $comp, '../' . $path_admin . $comp);
+	}
 }
 
 if (!empty($_POST['atualizarOrigemRepo'])) { 
@@ -79,15 +87,15 @@ if (!empty($_POST['atualizarOrigemRepo'])) {
 	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
 	$path = empty($_POST['path']) ? '' : $_POST['path'];
 
-	installDir($path_admin, $path, '/view');
-	installDir($path_admin, $path, '/controller/config');
-	installDir($path_admin, $path, '/script');
+	installDir($path_admin, $path, '/view'						, true);
+	installDir($path_admin, $path, '/controller/config'			, true);
+	installDir($path_admin, $path, '/script'					, true);
 
-	installFile($path_admin, $path, '/controller/include.php'	);
-	installFile($path_admin, $path, '/create-user/form.php'		);
-	installFile($path_admin, $path, '/create-user/form.js'		);
-	installFile($path_admin, $path, '/config.json'				);
-	installFile($path_admin, $path, '/config.env'				);
+	installFile($path_admin, $path, '/controller/include.php'	, true);
+	installFile($path_admin, $path, '/create-user/form.php'		, true);
+	installFile($path_admin, $path, '/create-user/form.js'		, true);
+	installFile($path_admin, $path, '/config.json'				, true);
+	installFile($path_admin, $path, '/config.env'				, true);
 
 	echo '1';
 }

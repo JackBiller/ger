@@ -466,9 +466,27 @@ function copyFile($origin, $dist) {
 	return createFile($dist, $file);
 }
 
+function mergeFile($origin1, $origin2, $file) { 
+	$filObj1 = getObjFile($file,$origin1);
+	$filObj2 = getObjFile($file,$origin2);
+
+	// echo $filObj1->get('dateCriation');
+	// echo $filObj1->get('dateCriation');
+
+	$diff = getDateMaior($filObj1->get('dateCriation'), $filObj2->get('dateCriation'));
+	if ($diff == 0) { 
+		copyFile($origin1.$file, $origin2.$file);
+	} else { 
+		copyFile($origin2.$file, $origin1.$file);
+	}
+}
+
 function getObjFile($file,$path) { 
 	$filObj = new File($file, $path.'/'.$file);
-	$filObj->set(date('Y-m-d H:i:s', filemtime($path.'/'.$file)), 'dateCriation');
+	$filObj->set(
+		(is_file($path.'/'.$file) ? date('Y-m-d H:i:s', filemtime($path.'/'.$file)) : '1950-01-01 00:00:00')
+		, 'dateCriation'
+	);
 	return $filObj;
 }
 
@@ -524,6 +542,39 @@ function copyDir($dirOrigin, $dirDist) {
 					);
 				}
 			}
+		}
+	}
+}
+
+function mergeDir($path1, $path2) { 
+	if (!is_dir($path1)) mkdir($path1);
+	if (!is_dir($path2)) mkdir($path2);
+
+	$objects = scandir($path1);
+	foreach ($objects as $object) { 
+		mergeActionDir($path1, $path2, $object);
+	}
+
+	$objects = scandir($path2);
+	foreach ($objects as $object) { 
+		mergeActionDir($path2, $path1, $object);
+	}
+}
+
+function mergeActionDir($path1, $path2, $object) { 
+	if ($object != '.' && $object != '..') { 
+		if (is_dir($path1 . DIRECTORY_SEPARATOR . $object)) { 
+			mkdir($path2 . DIRECTORY_SEPARATOR . $object);
+			mergeDir(
+				$path1 . DIRECTORY_SEPARATOR . $object, 
+				$path2 . DIRECTORY_SEPARATOR . $object
+			);
+		} else if (is_file($path1 . DIRECTORY_SEPARATOR . $object)) { 
+			mergeFile(
+				$path1 . DIRECTORY_SEPARATOR, 
+				$path2 . DIRECTORY_SEPARATOR,
+				$object
+			);
 		}
 	}
 }
@@ -713,6 +764,10 @@ function arrayEmJson($array) {
 /* OUTRAS FUNÇÕES DO ARQUIVO SANHIDREL funcoes.php */
 /**********************************************************************************************/
 /** FUNÇÕES COM DATAS */
+function getDateMaior($data1, $data2) { 
+	return strtotime($data1) > strtotime($data2) ? 0 : 1; // Comparando as Datas
+}
+
 function formataDatUN($dataUN) { 
 	return implode("/", array_reverse(explode("-", $dataUN)));
 }

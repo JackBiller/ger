@@ -61,6 +61,7 @@ if (!empty($_POST['instalar_projeto'])) {
 	installFile($path, $path_admin, '/controller/include.php'	);
 	installFile($path, $path_admin, '/create-user/form.php'		);
 	installFile($path, $path_admin, '/create-user/form.js'		);
+	installFile($path, $path_admin, '/password-change/form.js'	);
 	installFile($path, $path_admin, '/config.json'				);
 	installFile($path, $path_admin, '/config.env'				);
 
@@ -94,6 +95,7 @@ if (!empty($_POST['atualizarOrigemRepo'])) {
 	installFile($path_admin, $path, '/controller/include.php'	, true);
 	installFile($path_admin, $path, '/create-user/form.php'		, true);
 	installFile($path_admin, $path, '/create-user/form.js'		, true);
+	installFile($path_admin, $path, '/password-change/form.js'	, true);
 	installFile($path_admin, $path, '/config.json'				, true);
 	installFile($path_admin, $path, '/config.env'				, true);
 

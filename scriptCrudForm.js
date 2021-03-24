@@ -125,7 +125,7 @@ function formCodigoConsultaCampo() {
 	var form = resolvConfig([
 		{ input: { text: 'Botão Limpar' , id: 'ck_btnClear' , type: 'checkbox' , checked: (configCampo_Global.ck_btnClear || false) } },
 		{ input: { id: 'tabelaCodc', text: 'Tabela'
-			, datalist: { param: { 'buscarTabela': true }, input: 'DS_TABELA' }
+			, datalist: { param: { 'buscarTabela': true, path_admin: configJsonGeral_Global.path_admin }, input: 'DS_TABELA' }
 			, value: (configCampo_Global.tabelaCodc || '')
 		} },
 		{ button: { class: 'btn btn-primary btn-block', desc: 'Buscar Campos'

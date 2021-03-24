@@ -25,7 +25,11 @@ function initFormSubForm() {
 
 function carregarTipSubForm() { 
 	var inputs = [];
-	var paginas = configJson_Global.paginas.filter(config => config.descricao != resolvVal("descricao"));
+	try { 
+		var paginas = (configJson_Global.paginas || []).filter(config => config.descricao != resolvVal("descricao"));
+	} catch(e) { 
+		var paginas = [];
+	}
 
 	(paginas.filter(config => config.descricao == resolvVal('subForm')) || [])
 		.forEach(config => { 
@@ -60,7 +64,7 @@ function adicionarSubForm() {
 	if (subForm 		== '') return alert('Informe o formulário filho!');
 	if (paramSubForm 	== '') return alert('Informe o Param Sub-Form!');
 
-	var indicePg = configJson_Global.paginas.map(d => d.descricao).indexOf(origin_form);
+	var indicePg = (configJson_Global.paginas || []).map(d => d.descricao).indexOf(origin_form);
 	if (indicePg < 0) return alert('Formulario pai não é valido!');
 
 	if ((configJson_Global.paginas[indicePg].subForm || '') == '') configJson_Global.paginas[indicePg].subForm = [];
@@ -88,7 +92,7 @@ function editarSubForm(obj) {
 function apagarSubForm(obj) { 
 	var origin_form = resolvVal("descricao");
 
-	var indicePg = configJson_Global.paginas.map(d => d.descricao).indexOf(origin_form);
+	var indicePg = (configJson_Global.paginas || []).map(d => d.descricao).indexOf(origin_form);
 	if (indicePg < 0) return alert('Formulario pai não é valido!');
 
 	var indice = configJson_Global.paginas[indicePg].subForm.map(sf => sf.subForm).indexOf(obj.subForm);
@@ -100,7 +104,11 @@ function apagarSubForm(obj) {
 
 function montarGradeSubForm() { 
 	var origin_form = resolvVal("descricao");
-	var indicePg = configJson_Global.paginas.map(d => d.descricao).indexOf(origin_form);
+	try { 
+		var indicePg = (configJson_Global.paginas || []).map(d => d.descricao).indexOf(origin_form);
+	} catch(e) { 
+		var indicePg = -1;
+	}
 	if (indicePg < 0) return;
 
 	$("#gradeSubForm").html(

@@ -10,10 +10,12 @@ include 'funcoes.php';
 /* Operações Banco de Dados */
 /****************************************************************************************/
 if (!empty($_POST['buscarTabela'])) { 
-	$pdo = getConection();
+	$path_admin = $_POST['path_admin'];
+
+	$pdo = getConection('../' . $path_admin . './config.env');
 	$tabela = empty($_POST['tabela']) ? '' : "AND TABLE_NAME = '" . $_POST['tabela'] . "'";
 
-	$config = json_decode(file_get_contents("./config.env"));
+	$config = json_decode(file_get_contents('../' . $path_admin . './config.env'));
 	$db_nome = $config->db_nome;
 
 	$sql = "SELECT 
@@ -38,6 +40,23 @@ if (!empty($_POST['carregarCampos'])) {
 /****************************************************************************************/
 /* Gerenciador de Projetos */
 /****************************************************************************************/
+if (!empty($_POST['get_config_json_projeto'])) { 
+	class ConfigJson extends PadraoObjeto { 
+		var $paginas = array();
+		var $libs = array();
+	}
+
+	$nome = $_POST['nome'];
+
+	if (!is_dir('./setting')) mkdir('./setting');
+
+	if (is_file("./setting/config$nome.json")) { 
+		echo ctxFile("./setting/config$nome.json");
+	} else {
+		echo toJson(new ConfigJson());
+	}
+}
+
 if (!empty($_POST['abrir_projeto'])) { 
 	$path_root = empty($_POST['path_root']) ? 'C:/xampp/htdocs/' : $_POST['path_root'];
 	$path = empty($_POST['path']) ? '' : $_POST['path'];

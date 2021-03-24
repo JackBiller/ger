@@ -27,7 +27,7 @@ var config_Global = [
 		select: { text: 'Tabela', value: 'DS_TABELA', desc: 'DS_TABELA' },
 		descForm: 'tabelaBd', id: 'DS_TABELA',
 		dist: 'S', xs: '12',
-		param: { 'buscarTabela': true }
+		param: { 'buscarTabela': true, path_admin: () => configJsonGeral_Global.path_admin }
 	} },
 	{ input: { text: 'TITULO_PAGINA', input: 'titulo' 	, id: 'titulo' } },
 	{ input: { text: 'DESC_FORM'	, input: 'descricao' , id: 'descricao', required: true } },
@@ -224,7 +224,7 @@ function gravarArquivosProcessados() {
 
 function montarGradePaginas() { 
 	$("#listaPaginas").html(''
-		+ (configJson_Global.paginas.length == 0 ? 'Nenhum formulario cadastrado!' : ''
+		+ ((configJson_Global.paginas.length || 0) == 0 ? 'Nenhum formulario cadastrado!' : ''
 			+ resolvGrade(configJson_Global.paginas, {
 				inputs: [
 					{ head: 'Titulo'	, param: 'titulo' 		},

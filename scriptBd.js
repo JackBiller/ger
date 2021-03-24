@@ -8,7 +8,11 @@ var configFormBd_Global = { row: [
 		, onblur: () => { validaNomeTabela(); }
 		, classDiv: 'col-md-12'
 		, datalist: { 
-			ajax: 'ajax', param: { 'buscarTabela': true }, input: 'DS_TABELA'
+			ajax: 'ajax'
+			, param: { 'buscarTabela': true
+				, path_admin: () => configJsonGeral_Global.path_admin
+			}
+			, input: 'DS_TABELA'
 		}
 	} },
 	{ button: { desc: 'Novo', class: 'btn btn-primary btn-block', icon: 'file'
@@ -31,8 +35,10 @@ function validaNomeTabela() {
 	var tabela = resolvVal('nomeTabelaBD');
 	if (tabelaBd == '') return;
 
+	var { path_admin } = configJsonGeral_Global;
+
 	ajax({
-		param: { 'buscarTabela': true, tabela },
+		param: { 'buscarTabela': true, tabela, path_admin },
 		done: function(data) { 
 			console.log(data);
 			data = JSON.parse(data);

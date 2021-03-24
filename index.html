@@ -37,21 +37,17 @@ var configMain_Global = {
 	menu: { descForm: 'menuPrincipal', no_link: true, abas: [
 		{ text: 'Instalar Projeto', icon: 'gear'
 			, ctx: { row: [
-				{ button: {
-					desc: 'Admin Código', id: 'btnOpenAdmin', class: 'btn btn-block btn-primary', icon: 'code'
-					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3'
+				{ button: { desc: 'Admin Código', id: 'btnOpenAdmin', icon: 'code'
+					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3', class: 'btn btn-block btn-primary'
 				} },
-				{ button: {
-					desc: 'Admin Browser', click: function() { viewProject(); }, class: 'btn btn-block btn-info', icon: 'eye'
-					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3'
+				{ button: { desc: 'Admin Browser', click: function() { viewProject(); }, icon: 'eye'
+					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3', class: 'btn btn-block btn-info'
 				} },
-				{ button: {
-					desc: 'Resolv Código', id: 'btnOpenResolv', class: 'btn btn-block btn-primary', icon: 'code'
-					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3'
+				{ button: { desc: 'Resolv Código', id: 'btnOpenResolv', icon: 'code'
+					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3', class: 'btn btn-block btn-primary'
 				} },
-				{ button: {
-					desc: 'Resolv Install', click: function() { installResolv(); }, class: 'btn btn-block btn-warning', icon: 'download'
-					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3'
+				{ button: { desc: 'Resolv Install', click: function() { installResolv(); }, icon: 'download'
+					, styleDiv: { 'margin-top': '15px' }, classDiv: 'col-md-3', class: 'btn btn-block btn-warning'
 				} },
 				{ div: { class: 'col-md-12' , id: 'formularioProjetos' } },
 			] }
@@ -122,7 +118,8 @@ $("body").append(resolvConfigModal(configMain_Global));
 
 
 function salvarConfigProjeto() { 
-	var file = '../../../config.json'
+	// var file = '../' + configJsonGeral_Global.path_admin + '/config.json'
+	var file = '../' + projetoInstalado_Global.path + '/config.json'
 	, 	ctx = jsonToString(configJsonProjeto_Global,0,true);
 
 	ajax({
@@ -136,7 +133,7 @@ function salvarConfigProjeto() {
 
 var usuario_Global = {};
 function salvarArquivo() { 
-	var file = 'config.json'
+	var file = "./setting/config" + projetoInstalado_Global.nome + ".json"
 	, 	ctx = jsonToString(configJson_Global,0,true);
 
 	ajax({
@@ -152,28 +149,40 @@ var configJsonProjeto_Global;
 var configJson_Global;
 var initComponet_Global = false;
 function carregarConfigApp() { 
-	$.getJSON("../../../config.json?" + (new Date()).toString(), function(data) { 
+	if ((projetoInstalado_Global || '') == '') return;
+
+	$.getJSON("../" + projetoInstalado_Global.path + "/config.json?" + (new Date()).toString(), function(data) { 
 		configJsonProjeto_Global = data;
 
-		$.getJSON("./config.json?" + (new Date()).toString(), function(data) { 
-			configJson_Global = data;
-			if (!initComponet_Global) { 
-				loadLib();
-				initFormCrud();
-				initFormBd();
-				initFormSubForm();
-				loadBlockCode();
-				initComponet_Global = true;
-			}
-			initFormLogin();
-			carregarTipSubForm();
-			montarGradePaginas();
-			if (((configJson_Global.ftp || {}).lastUpdate || '') != '') { 
-				$("#lastUpdateFtp").val(
-					moment(configJson_Global.ftp.lastUpdate).format('DD/MM/Y HH:mm:ss')
-				);
+		var { nome } = projetoInstalado_Global;
+
+		ajax({
+			param: { 'get_config_json_projeto': true, nome },
+			done: function(data) { 
+				console.log(data);
+				data = JSON.parse(data);
+				console.log(data);
+				
+				configJson_Global = data;
+				if (!initComponet_Global) { 
+					loadLib();
+					initFormCrud();
+					initFormBd();
+					initFormSubForm();
+					loadBlockCode();
+					initComponet_Global = true;
+				}
+				initFormLogin();
+				carregarTipSubForm();
+				montarGradePaginas();
+				if (((configJson_Global.ftp || {}).lastUpdate || '') != '') { 
+					$("#lastUpdateFtp").val(
+						moment(configJson_Global.ftp.lastUpdate).format('DD/MM/Y HH:mm:ss')
+					);
+				}
 			}
 		});
+		// $.getJSON("./config.json?" + (new Date()).toString(), function(data) {  });
 	});
 }
 
@@ -413,6 +422,7 @@ function resolvProjetoInstalado() {
 				title: 'Vai abrir os diretórios view e controller/config, depois verificar o que foi alterado por último',
 			}
 		}));
+		carregarConfigApp();
 	}
 }
 

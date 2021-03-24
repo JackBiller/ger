@@ -67,7 +67,7 @@ function initFormLogin() {
 		+ resolvGrade(configJsonProjeto_Global.menu.filter(m => (m.desc || '') != ''), {
 			inputs: [
 				{ head: 'Desc', param: 'desc' },
-				{ head: 'Nº Itens', param: dt => dt.itens.length },
+				{ head: 'Nº Itens', param: dt => (dt.itens || []).length },
 				{ head: '', tdClick: 'editItemMenu'
 					, param: dt => resolvConfig({ button: { 
 						name: 'editMenu', data: { id: dt.desc },

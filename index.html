@@ -29,6 +29,7 @@
 <script src="./scriptCrudSubForm.js"></script>
 <script src="./scriptLib.js"></script>
 <script src="./scriptBd.js"></script>
+<script src="./scriptRodarScript.js"></script>
 
 <script>
 
@@ -111,6 +112,13 @@ var configMain_Global = {
 				} },
 			] }
 		},
+		{ text: 'Rodar Script', icon: 'gear'
+			, ctx: { row: [
+				{ div: { class: 'col-md-12'	, id: 'rodarScriptDiv' 
+					, style: { 'margin-top':'15px' }
+				} },
+			] }
+		},
 	]
 } }
 $("#conteudo").html(resolvConfig(configMain_Global, 1, true));
@@ -170,6 +178,7 @@ function carregarConfigApp() {
 					initFormBd();
 					initFormSubForm();
 					loadBlockCode();
+					initFormRodarScript();
 					initComponet_Global = true;
 				}
 				initFormLogin();

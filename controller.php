@@ -35,6 +35,67 @@ if (!empty($_POST['carregarCampos'])) {
 	echo toJson(padraoResultado($pdo, $sql, 'Nenhum resultado encontrado!'));
 }
 
+if (!empty($_POST['rodarScript'])) { 
+	$path_admin = $_POST['path_admin'];
+
+	$pdo = getConection('../' . $path_admin . './config.env');
+
+	$config = json_decode(file_get_contents('../' . $path_admin . './config.env'));
+	$db_nome = $config->db_nome;
+
+	checkTableScript($pdo, $db_nome);
+
+	$ds_script = $_POST['ds_script'];
+	$script = ctxFile('../' . $path_admin . './script/' . $ds_script);
+	if (empty($_POST['no_run'])) { 
+		// printQuery($script);
+		padraoExecute($pdo, $script, '');
+	}
+	$script = str_replace("'", "\\'", $script);
+
+	$sql = "INSERT INTO SCRIPT 	(CTX_SCRIPT, DS_SCRIPT)
+			VALUES 				('$script', '$ds_script');";
+	// printQuery($sql);
+	echo padraoExecute($pdo, $sql, '');
+}
+
+if (!empty($_POST['listarScripts'])) { 
+	$path_admin = $_POST['path_admin'];
+
+	$pdo = getConection('../' . $path_admin . './config.env');
+
+	$config = json_decode(file_get_contents('../' . $path_admin . './config.env'));
+	$db_nome = $config->db_nome;
+
+	checkTableScript($pdo, $db_nome);
+
+	$sql = "SELECT * FROM SCRIPT";
+	// printQuery($sql);
+	echo toJson(padraoResultado($pdo, $sql, 'Nenhum script rodado!'));
+}
+
+function checkTableScript($pdo, $db_nome) { 
+	$sql = "SELECT 
+				TABLE_NAME AS DS_TABELA 
+			FROM information_schema.tables
+			WHERE table_schema = '$db_nome'
+			AND TABLE_NAME = 'SCRIPT'";
+	// printQuery($sql);
+	$resultado = padraoResultado($pdo, $sql, 'Nenhum resultado encontrado!');
+	$resultado = $resultado[0];
+
+	if ($resultado->get('debug') != 'OK') { 
+		$sql = "CREATE TABLE SCRIPT (
+					ID_SCRIPT INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+					DS_SCRIPT VARCHAR(50) NOT NULL,
+					DT_SCRIPT DATETIME DEFAULT CURRENT_TIMESTAMP,
+					CTX_SCRIPT TEXT NOT NULL
+				);";
+		// printQuery($sql);
+		padraoExecute($pdo, $sql, '');
+	}
+}
+
 
 
 /****************************************************************************************/
@@ -206,6 +267,7 @@ if (!empty($_POST['gerarArquivo'])) {
 }
 
 if (!empty($_POST['listDir'])) { 
+	// echo $_POST['path'];
 	$path = $_POST['path'];
 	echo toJson(listDir($path));
 }

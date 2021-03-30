@@ -200,6 +200,16 @@ if (!empty($_POST['installResolv'])) {
 	copyFile('../' . $path . '/resolvConfig.full.js', '../' . $path_admin . '/js/resolvConfig.full.js');
 	copyFile('../' . $path . '/resolvConfig.full.js', './resolvConfig.full.js');
 
+
+	$resolvMin = ctxFile('../' . $path . '/dist/resolvConfig.min.js');
+	// var_dump($resolvMin);
+	$resolvMin = substr($resolvMin, 6, strlen($resolvMin)-5-6);
+
+	createFile('../' . $path_admin . '/js/resolvConfig.min.js', $resolvMin);
+	createFile('./resolvConfig.min.js', $resolvMin);
+	// copyFile('../' . $path . '/resolvConfig.min.js', '../' . $path_admin . '/js/resolvConfig.min.js');
+	// copyFile('../' . $path . '/resolvConfig.min.js', './resolvConfig.min.js');
+
 	echo '1';
 }
 

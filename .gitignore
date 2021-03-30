@@ -5,5 +5,6 @@
 !composer.json
 
 resolvConfig.full.js
+resolvConfig.min.js
 
 /vendor/

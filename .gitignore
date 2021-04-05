@@ -3,6 +3,7 @@
 *.json
 !configTemplate.json
 !composer.json
+!themeDashbord.json
 
 resolvConfig.full.js
 resolvConfig.min.js

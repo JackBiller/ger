@@ -1,0 +1,47 @@
+{ 
+	"theme": { 
+		"black": { 
+			"color1": "#222222",
+			"color2": "#ffffff",
+			"color3": "#fcfcfc"
+		},
+		"blue": { 
+			"color1": "#3c8dbc",
+			"color2": "#367fa9",
+			"color3": "#357ca5"
+		},
+		"green": { 
+			"color1": "#00a65a",
+			"color2": "#008d4c",
+			"color3": "#008749"
+		},
+		"purple": { 
+			"color1": "#605ca8",
+			"color2": "#555299",
+			"color3": "#545096"
+		},
+		"red": { 
+			"color1": "#dd4b39",
+			"color2": "#d73925",
+			"color3": "#d33724"
+		},
+		"yellow": { 
+			"color1": "#f39c12",
+			"color2": "#e08e0b",
+			"color3": "#db8b0b"
+		}
+	},
+	"menu": { 
+		"color": "#b8c7ce",
+		"background": "#222d32",
+		"hover": "#1e282c"
+	},
+	"menu_principal": { 
+		"color": "#4b646f",
+		"background": "#1a2226"
+	},
+	"sub_menu": { 
+		"color": "#8aa4af",
+		"background": "#2c3b41"
+	}
+}

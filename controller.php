@@ -145,6 +145,7 @@ if (!empty($_POST['instalar_projeto'])) {
 	installFile($path, $path_admin, '/principal/_skin-custom.css'	);
 	installFile($path, $path_admin, '/config.json'					);
 	installFile($path, $path_admin, '/config.env'					);
+	installFile($path, $path_admin, '/composer.json'				);
 
 	echo '1';
 }
@@ -180,6 +181,7 @@ if (!empty($_POST['atualizarOrigemRepo'])) {
 	installFile($path, $path_admin, '/principal/_skin-custom.css'	, true);
 	installFile($path_admin, $path, '/config.json'					, true);
 	installFile($path_admin, $path, '/config.env'					, true);
+	installFile($path_admin, $path, '/composer.json'				, true);
 
 	echo '1';
 }

@@ -217,6 +217,119 @@ if (!empty($_POST['installResolv'])) {
 	echo '1';
 }
 
+if (!empty($_POST['gerarProducao'])) { 
+	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
+
+	removeDir('../' . $path_admin . '/dist');
+	mkdir('../' . $path_admin . '/dist');
+
+	copyFile('../' . $path_admin . '/index.html'				, '../' . $path_admin . '/dist/index.html'				);
+	mkdir('../' . $path_admin . '/dist/js');
+	copyFile('../' . $path_admin . '/js/indexApp.js'			, '../' . $path_admin . '/dist/js/indexApp.js'			);
+	copyFile('../' . $path_admin . '/js/resolvConfig.min.js'	, '../' . $path_admin . '/dist/js/resolvConfig.min.js'	);
+
+	copyDir('../' . $path_admin . '/principal'					, '../' . $path_admin . '/dist/principal'				);
+	copyDir('../' . $path_admin . '/login'						, '../' . $path_admin . '/dist/login'					);
+	copyDir('../' . $path_admin . '/img'						, '../' . $path_admin . '/dist/img'						);
+	copyDir('../' . $path_admin . '/controller'					, '../' . $path_admin . '/dist/controller'				);
+
+	$configEnv_text = ctxFile('../' . $path_admin . '/config.env');
+	$config_text 	= ctxFile('../' . $path_admin . '/config.json');
+	$config = json_decode($config_text);
+
+
+	if (isset($config->cadastro)) { 
+		copyDir('../' . $path_admin . '/create-user', '../' . $path_admin . '/dist/create-user');
+	}
+	if (isset($config->forget_password)) { 
+		copyDir('../' . $path_admin . '/password-change', '../' . $path_admin . '/dist/password-change');
+		copyDir('../' . $path_admin . '/password-reset', '../' . $path_admin . '/dist/password-reset');
+	}
+
+
+	$menu = $config->menu;
+	if (!is_dir('../' . $path_admin . '/dist/view')) mkdir('../' . $path_admin . '/dist/view');
+
+	$filesViews = array();
+	for ($i=0; $i < sizeof($menu); $i++) { 
+		$item_menu = $menu[$i];
+
+		if (isset($item_menu->file)) {
+			$file = incrementFile($path_admin, $item_menu->file);
+			if ($file != '') { 
+				array_push($filesViews, $item_menu->file);
+			}
+
+			if (isset($item_menu->itens)) { 
+				$itens = $item_menu->itens;
+				for ($j=0; $j < sizeof($itens); $j++) { 
+					$item_subMenu = $itens[$j];
+
+					if (isset($item_subMenu->file)) { 
+						$file = incrementFile($path_admin, $item_subMenu->file);
+						if ($file != '') { 
+							array_push($filesViews, $item_subMenu->file);
+						}
+					}
+				}
+			}
+		}
+	}
+	$dir = listDir('../' . $path_admin . '/view');
+	$branchs = $dir->branchs;
+	for ($i=0; $i < sizeof($branchs); $i++) { 
+		$item = $branchs[$i];
+		if ($item->ext != "html") { 
+			copyFile(
+				'../' . $path_admin . '/view/' . $item->name,
+				'../' . $path_admin . '/dist/view/' . $item->name
+			);
+		}
+	}
+
+	$configEnv_text = str_replace('"', '\\"', $configEnv_text	);
+	$config_text 	= str_replace('"', '\\"', $config_text		);
+	createFile('../' . $path_admin . '/dist/controller/constConfig.php', ''
+		. "<?php"
+		. "\n"
+		. "\ndefine('EXT_VIEW', 'php');"
+		. "\ndefine('CONFIG_ENV', \"$configEnv_text\");"
+		. "\ndefine('CONFIG_JSON', \"$config_text\");"
+		. "\n"
+		. "\n?>"
+	);
+
+	replaceResolvFile($path_admin, ''					, 'script.js'	);
+	replaceResolvFile($path_admin, 'create-user'		, 'index.html'	);
+	replaceResolvFile($path_admin, 'login'				, 'index.html'	);
+	replaceResolvFile($path_admin, 'password-change'	, 'index.php'	);
+	replaceResolvFile($path_admin, 'password-reset'		, 'index.html'	);
+	replaceResolvFile($path_admin, 'principal'			, 'index.html'	);
+
+	echo '1';
+}
+function incrementFile($path_admin, $file) { 
+	if (isset($file) && is_file('../' . $path_admin . '/view/' . $file . '.html')) { 
+		$fileCtx = ctxFile('../' . $path_admin . '/view/' . $file . '.html');
+
+		createFile(
+			'../' . $path_admin . '/dist/view/' . $file . '.php',
+			"<?php return; ?>\n".$fileCtx
+		);
+		return $file;
+		// array_push($filesViews, $file);
+	}
+	return '';
+}
+function replaceResolvFile($path_admin, $path, $file) { 
+	if (!is_file('../' . $path_admin . '/' . $path . '/' . $file)) return false;
+
+	$fileCtx = ctxFile('../' . $path_admin . '/' . $path . '/' . $file);
+	$fileCtx = str_replace('resolvConfig.full.js','resolvConfig.min.js',$fileCtx);
+	createFile('../' . $path_admin . '/dist/' . $path . '/' . $file, $fileCtx);
+	return true;
+}
+
 
 
 /****************************************************************************************/

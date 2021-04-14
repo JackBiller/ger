@@ -421,16 +421,24 @@ function resolvProjetoInstalado() {
 	if (localStorage.projeto) { 
 		projetoInstalado_Global = JSON.parse(localStorage.getItem('projeto'));
 
-		$("#projetoInstalado").html(resolvConfig({
-			br: {  },
-			h2: { text: '<b>Projeto Instalado: </b>' + projetoInstalado_Global.nome },
-			h3: { text: '<b>Data Instalação: </b>' + projetoInstalado_Global.dataForm },
-			button: { 
-				desc: 'Mesclar Diretórios da Instalação', icon: 'refresh', class: 'btn btn-primary',
-				click: function() { atualizarOrigemRepo(); },
-				title: 'Vai abrir os diretórios view e controller/config, depois verificar o que foi alterado por último',
+		$("#projetoInstalado").html(resolvConfig({ row: [ 
+			{
+				br: {  },
+				h2: { text: '<b>Projeto Instalado: </b>' + projetoInstalado_Global.nome },
+				h3: { text: '<b>Data Instalação: </b>' + projetoInstalado_Global.dataForm },
+				button: { 
+					desc: 'Mesclar Diretórios da Instalação', icon: 'refresh', class: 'btn btn-primary',
+					click: function() { atualizarOrigemRepo(); },
+					title: 'Vai abrir os diretórios view e controller/config, depois verificar o que foi alterado por último',
+				},
+			},{
+				button: { 
+					desc: 'Gerar Código Produção', icon: 'gear', class: 'btn btn-warning',
+					click: function() { gerarProducao(); },
+					title: 'Vai abrir os diretórios view e controller/config, depois verificar o que foi alterado por último',
+				},
 			}
-		}));
+		]}));
 		carregarConfigApp();
 	}
 }
@@ -445,6 +453,20 @@ function atualizarOrigemRepo() {
 		done: function(data) { 
 			console.log(data);
 			alert(data == '1' ? 'Atualizado com sucesso!' : 'Falha ao atualizar: ' + data);
+		}
+	});
+}
+
+function gerarProducao() { 
+	ajax({
+		param: { 
+			'gerarProducao': true, 
+			path: projetoInstalado_Global.path, 
+			path_admin: configJsonGeral_Global.path_admin,
+		},
+		done: function(data) { 
+			console.log(data);
+			// alert(data == '1' ? 'Atualizado com sucesso!' : 'Falha ao atualizar: ' + data);
 		}
 	});
 }

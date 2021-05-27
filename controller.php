@@ -138,15 +138,16 @@ if (!empty($_POST['instalar_projeto'])) {
 	installDir($path, $path_admin, '/controller/config');
 	installDir($path, $path_admin, '/script');
 
-	installFile($path, $path_admin, '/controller/include.php'		);
-	installFile($path, $path_admin, '/controller/upload.php'		);
-	installFile($path, $path_admin, '/create-user/form.php'			);
-	installFile($path, $path_admin, '/create-user/form.js'			);
-	installFile($path, $path_admin, '/password-change/form.js'		);
-	installFile($path, $path_admin, '/principal/_skin-custom.css'	);
-	installFile($path, $path_admin, '/config.json'					);
-	installFile($path, $path_admin, '/config.env'					);
-	installFile($path, $path_admin, '/composer.json'				);
+	installFile($path, $path_admin, '/controller/include.php'			);
+	installFile($path, $path_admin, '/controller/upload.php'			);
+	installFile($path, $path_admin, '/controller/constConfigAdd.php'	);
+	installFile($path, $path_admin, '/create-user/form.php'				);
+	installFile($path, $path_admin, '/create-user/form.js'				);
+	installFile($path, $path_admin, '/password-change/form.js'			);
+	installFile($path, $path_admin, '/principal/_skin-custom.css'		);
+	installFile($path, $path_admin, '/config.json'						);
+	installFile($path, $path_admin, '/config.env'						);
+	installFile($path, $path_admin, '/composer.json'					);
 
 	echo '1';
 }
@@ -171,19 +172,20 @@ if (!empty($_POST['atualizarOrigemRepo'])) {
 	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
 	$path = empty($_POST['path']) ? '' : $_POST['path'];
 
-	installDir($path_admin, $path, '/view'							, true);
-	installDir($path_admin, $path, '/controller/config'				, true);
-	installDir($path_admin, $path, '/script'						, true);
+	installDir($path_admin, $path, '/view'								, true);
+	installDir($path_admin, $path, '/controller/config'					, true);
+	installDir($path_admin, $path, '/script'							, true);
 
-	installFile($path_admin, $path, '/controller/include.php'		, true);
-	installFile($path_admin, $path, '/controller/upload.php'		, true);
-	installFile($path_admin, $path, '/create-user/form.php'			, true);
-	installFile($path_admin, $path, '/create-user/form.js'			, true);
-	installFile($path_admin, $path, '/password-change/form.js'		, true);
-	installFile($path, $path_admin, '/principal/_skin-custom.css'	, true);
-	installFile($path_admin, $path, '/config.json'					, true);
-	installFile($path_admin, $path, '/config.env'					, true);
-	installFile($path_admin, $path, '/composer.json'				, true);
+	installFile($path_admin, $path, '/controller/include.php'			, true);
+	installFile($path_admin, $path, '/controller/upload.php'			, true);
+	installFile($path_admin, $path, '/controller/constConfigAdd.php'	, true);
+	installFile($path_admin, $path, '/create-user/form.php'				, true);
+	installFile($path_admin, $path, '/create-user/form.js'				, true);
+	installFile($path_admin, $path, '/password-change/form.js'			, true);
+	installFile($path, $path_admin, '/principal/_skin-custom.css'		, true);
+	installFile($path_admin, $path, '/config.json'						, true);
+	installFile($path_admin, $path, '/config.env'						, true);
+	installFile($path_admin, $path, '/composer.json'					, true);
 
 	echo '1';
 }

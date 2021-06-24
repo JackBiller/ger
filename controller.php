@@ -9,7 +9,7 @@ include 'funcoes.php';
 /****************************************************************************************/
 /* Operações Banco de Dados */
 /****************************************************************************************/
-if (!empty($_POST['buscarTabela'])) { 
+if (!empty($_POST['buscarTabela'])) {
 	$path_admin = $_POST['path_admin'];
 
 	$pdo = getConection('../' . $path_admin . './config.env');
@@ -18,8 +18,8 @@ if (!empty($_POST['buscarTabela'])) {
 	$config = json_decode(file_get_contents('../' . $path_admin . './config.env'));
 	$db_nome = $config->db_nome;
 
-	$sql = "SELECT 
-				TABLE_NAME AS DS_TABELA 
+	$sql = "SELECT
+				TABLE_NAME AS DS_TABELA
 			FROM information_schema.tables
 			WHERE table_schema = '$db_nome'
 			$tabela";
@@ -27,7 +27,7 @@ if (!empty($_POST['buscarTabela'])) {
 	echo toJson(padraoResultado($pdo, $sql, 'Nenhuma tabela disponivel!'));
 }
 
-if (!empty($_POST['carregarCampos'])) { 
+if (!empty($_POST['carregarCampos'])) {
 	$pdo = getConection();
 	$tabelaBd = $_POST['tabelaBd'];
 	$sql = "SHOW COLUMNS FROM $tabelaBd;";
@@ -35,7 +35,7 @@ if (!empty($_POST['carregarCampos'])) {
 	echo toJson(padraoResultado($pdo, $sql, 'Nenhum resultado encontrado!'));
 }
 
-if (!empty($_POST['rodarScript'])) { 
+if (!empty($_POST['rodarScript'])) {
 	$path_admin = $_POST['path_admin'];
 
 	$pdo = getConection('../' . $path_admin . './config.env');
@@ -47,7 +47,7 @@ if (!empty($_POST['rodarScript'])) {
 
 	$ds_script = $_POST['ds_script'];
 	$script = ctxFile('../' . $path_admin . './script/' . $ds_script);
-	if (empty($_POST['no_run'])) { 
+	if (empty($_POST['no_run'])) {
 		// printQuery($script);
 		padraoExecute($pdo, $script, '');
 	}
@@ -59,7 +59,7 @@ if (!empty($_POST['rodarScript'])) {
 	echo padraoExecute($pdo, $sql, '');
 }
 
-if (!empty($_POST['listarScripts'])) { 
+if (!empty($_POST['listarScripts'])) {
 	$path_admin = $_POST['path_admin'];
 
 	$pdo = getConection('../' . $path_admin . './config.env');
@@ -74,9 +74,9 @@ if (!empty($_POST['listarScripts'])) {
 	echo toJson(padraoResultado($pdo, $sql, 'Nenhum script rodado!'));
 }
 
-function checkTableScript($pdo, $db_nome) { 
-	$sql = "SELECT 
-				TABLE_NAME AS DS_TABELA 
+function checkTableScript($pdo, $db_nome) {
+	$sql = "SELECT
+				TABLE_NAME AS DS_TABELA
 			FROM information_schema.tables
 			WHERE table_schema = '$db_nome'
 			AND TABLE_NAME = 'SCRIPT'";
@@ -84,7 +84,7 @@ function checkTableScript($pdo, $db_nome) {
 	$resultado = padraoResultado($pdo, $sql, 'Nenhum resultado encontrado!');
 	$resultado = $resultado[0];
 
-	if ($resultado->get('debug') != 'OK') { 
+	if ($resultado->get('debug') != 'OK') {
 		$sql = "CREATE TABLE SCRIPT (
 					ID_SCRIPT INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 					DS_SCRIPT VARCHAR(50) NOT NULL,
@@ -101,8 +101,8 @@ function checkTableScript($pdo, $db_nome) {
 /****************************************************************************************/
 /* Gerenciador de Projetos */
 /****************************************************************************************/
-if (!empty($_POST['get_config_json_projeto'])) { 
-	class ConfigJson extends PadraoObjeto { 
+if (!empty($_POST['get_config_json_projeto'])) {
+	class ConfigJson extends PadraoObjeto {
 		var $paginas = array();
 		var $libs = array();
 	}
@@ -111,21 +111,21 @@ if (!empty($_POST['get_config_json_projeto'])) {
 
 	if (!is_dir('./setting')) mkdir('./setting');
 
-	if (is_file("./setting/config$nome.json")) { 
+	if (is_file("./setting/config$nome.json")) {
 		echo ctxFile("./setting/config$nome.json");
 	} else {
 		echo toJson(new ConfigJson());
 	}
 }
 
-if (!empty($_POST['abrir_projeto'])) { 
+if (!empty($_POST['abrir_projeto'])) {
 	$path_root = empty($_POST['path_root']) ? 'C:/xampp/htdocs/' : $_POST['path_root'];
 	$path = empty($_POST['path']) ? '' : $_POST['path'];
 	shell_exec('cd ' . $path_root . '/' . $path . ' && code .');
 	echo 'cd ' . $path_root . '/' . $path . ' && code .';
 }
 
-if (!empty($_POST['instalar_projeto'])) { 
+if (!empty($_POST['instalar_projeto'])) {
 	$path_root = empty($_POST['path_root']) ? 'C:/xampp/htdocs/' : $_POST['path_root'];
 	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
 	$path = empty($_POST['path']) ? '' : $_POST['path'];
@@ -151,23 +151,23 @@ if (!empty($_POST['instalar_projeto'])) {
 
 	echo '1';
 }
-function installDir($path, $path_admin, $comp, $isMerge=false) { 
-	if ($isMerge) { 
+function installDir($path, $path_admin, $comp, $isMerge=false) {
+	if ($isMerge) {
 		mergeDir('../' . $path . $comp, '../' . $path_admin . $comp);
-	} else { 
+	} else {
 		removeDir('../' . $path_admin . $comp);
 		copyDir('../' . $path . $comp, '../' . $path_admin . $comp);
 	}
 }
-function installFile($path, $path_admin, $comp, $isMerge=false) { 
-	if ($isMerge) { 
+function installFile($path, $path_admin, $comp, $isMerge=false) {
+	if ($isMerge) {
 		mergeFile('../' . $path, '../' . $path_admin, $comp);
-	} else { 
+	} else {
 		copyFile('../' . $path . $comp, '../' . $path_admin . $comp);
 	}
 }
 
-if (!empty($_POST['atualizarOrigemRepo'])) { 
+if (!empty($_POST['atualizarOrigemRepo'])) {
 	$path_root = empty($_POST['path_root']) ? 'C:/xampp/htdocs/' : $_POST['path_root'];
 	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
 	$path = empty($_POST['path']) ? '' : $_POST['path'];
@@ -190,7 +190,7 @@ if (!empty($_POST['atualizarOrigemRepo'])) {
 	echo '1';
 }
 
-if (!empty($_POST['checkUpResolv'])) { 
+if (!empty($_POST['checkUpResolv'])) {
 	$path = $_POST['path'];
 	$path_admin = $_POST['path_admin'];
 
@@ -201,7 +201,7 @@ if (!empty($_POST['checkUpResolv'])) {
 	}
 }
 
-if (!empty($_POST['installResolv'])) { 
+if (!empty($_POST['installResolv'])) {
 	$path = $_POST['path'];
 	$path_admin = $_POST['path_admin'];
 
@@ -221,7 +221,7 @@ if (!empty($_POST['installResolv'])) {
 	echo '1';
 }
 
-if (!empty($_POST['gerarProducao'])) { 
+if (!empty($_POST['gerarProducao'])) {
 	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
 
 	removeDir('../' . $path_admin . '/dist');
@@ -242,38 +242,37 @@ if (!empty($_POST['gerarProducao'])) {
 	$config = json_decode($config_text);
 
 
-	if (isset($config->cadastro)) { 
+	if (isset($config->cadastro)) {
 		copyDir('../' . $path_admin . '/create-user', '../' . $path_admin . '/dist/create-user');
 	}
-	if (isset($config->forget_password)) { 
+	if (isset($config->forget_password)) {
 		copyDir('../' . $path_admin . '/password-change', '../' . $path_admin . '/dist/password-change');
 		copyDir('../' . $path_admin . '/password-reset', '../' . $path_admin . '/dist/password-reset');
 	}
-
 
 	$menu = $config->menu;
 	if (!is_dir('../' . $path_admin . '/dist/view')) mkdir('../' . $path_admin . '/dist/view');
 
 	$filesViews = array();
-	for ($i=0; $i < sizeof($menu); $i++) { 
+	for ($i=0; $i < sizeof($menu); $i++) {
 		$item_menu = $menu[$i];
 
 		if (isset($item_menu->file)) {
 			$file = incrementFile($path_admin, $item_menu->file);
-			if ($file != '') { 
+			if ($file != '') {
 				array_push($filesViews, $item_menu->file);
 			}
+		}
 
-			if (isset($item_menu->itens)) { 
-				$itens = $item_menu->itens;
-				for ($j=0; $j < sizeof($itens); $j++) { 
-					$item_subMenu = $itens[$j];
+		if (isset($item_menu->itens)) {
+			$itens = $item_menu->itens;
+			for ($j=0; $j < sizeof($itens); $j++) {
+				$item_subMenu = $itens[$j];
 
-					if (isset($item_subMenu->file)) { 
-						$file = incrementFile($path_admin, $item_subMenu->file);
-						if ($file != '') { 
-							array_push($filesViews, $item_subMenu->file);
-						}
+				if (isset($item_subMenu->file)) {
+					$file = incrementFile($path_admin, $item_subMenu->file);
+					if ($file != '') {
+						array_push($filesViews, $item_subMenu->file);
 					}
 				}
 			}
@@ -281,9 +280,9 @@ if (!empty($_POST['gerarProducao'])) {
 	}
 	$dir = listDir('../' . $path_admin . '/view');
 	$branchs = $dir->branchs;
-	for ($i=0; $i < sizeof($branchs); $i++) { 
+	for ($i=0; $i < sizeof($branchs); $i++) {
 		$item = $branchs[$i];
-		if ($item->ext != "html") { 
+		if ($item->ext != "html") {
 			copyFile(
 				'../' . $path_admin . '/view/' . $item->name,
 				'../' . $path_admin . '/dist/view/' . $item->name
@@ -293,6 +292,13 @@ if (!empty($_POST['gerarProducao'])) {
 
 	$configEnv_text = str_replace('"', '\\"', $configEnv_text	);
 	$config_text 	= str_replace('"', '\\"', $config_text		);
+
+	$constConfigAdd = '';
+	if (is_file('../' . $path_admin . '/dist/controller/constConfigAdd.php')) {
+		$constConfigAdd = ""
+			. ctxFile('../' . $path_admin . '/dist/controller/constConfigAdd.php');
+	}
+
 	createFile('../' . $path_admin . '/dist/controller/constConfig.php', ''
 		. "<?php"
 		. "\n"
@@ -300,20 +306,24 @@ if (!empty($_POST['gerarProducao'])) {
 		. "\ndefine('CONFIG_ENV', \"$configEnv_text\");"
 		. "\ndefine('CONFIG_JSON', \"$config_text\");"
 		. "\n"
-		. "\n?>"
+		. "\n?>$constConfigAdd"
 	);
 
+	if (isset($config->cadastro)) {
+		replaceResolvFile($path_admin, 'create-user'		, 'index.html'	);
+	}
+	if (isset($config->forget_password)) {
+		replaceResolvFile($path_admin, 'password-change'	, 'index.php'	);
+		replaceResolvFile($path_admin, 'password-reset'		, 'index.html'	);
+	}
 	replaceResolvFile($path_admin, ''					, 'script.js'	);
-	replaceResolvFile($path_admin, 'create-user'		, 'index.html'	);
 	replaceResolvFile($path_admin, 'login'				, 'index.html'	);
-	replaceResolvFile($path_admin, 'password-change'	, 'index.php'	);
-	replaceResolvFile($path_admin, 'password-reset'		, 'index.html'	);
 	replaceResolvFile($path_admin, 'principal'			, 'index.html'	);
 
 	echo '1';
 }
-function incrementFile($path_admin, $file) { 
-	if (isset($file) && is_file('../' . $path_admin . '/view/' . $file . '.html')) { 
+function incrementFile($path_admin, $file) {
+	if (isset($file) && is_file('../' . $path_admin . '/view/' . $file . '.html')) {
 		$fileCtx = ctxFile('../' . $path_admin . '/view/' . $file . '.html');
 
 		createFile(
@@ -325,7 +335,7 @@ function incrementFile($path_admin, $file) {
 	}
 	return '';
 }
-function replaceResolvFile($path_admin, $path, $file) { 
+function replaceResolvFile($path_admin, $path, $file) {
 	if (!is_file('../' . $path_admin . '/' . $path . '/' . $file)) return false;
 
 	$fileCtx = ctxFile('../' . $path_admin . '/' . $path . '/' . $file);
@@ -339,13 +349,13 @@ function replaceResolvFile($path_admin, $path, $file) {
 /****************************************************************************************/
 /* Index / Controller */
 /****************************************************************************************/
-if (!empty($_POST['headFooterView'])) { 
+if (!empty($_POST['headFooterView'])) {
 	$tempName = date('YmdHis');
 
 	$files = listDir("../../../view");
 	$files = $files->branchs;
 	$filesDesc = array();
-	for ($i = 0; $i < sizeof($files); $i++) { 
+	for ($i = 0; $i < sizeof($files); $i++) {
 		createFile("./template/$tempName.html", ctxFile('./template/view.html'));
 		$text = getTextInFile('../../../view/' . $files[$i]->name
 			, "<!-- START_CXT_VIEW -->", "<!-- END_CXT_VIEW -->"
@@ -360,7 +370,7 @@ if (!empty($_POST['headFooterView'])) {
 	deleteFile("./template/$tempName.html");
 }
 
-if (!empty($_POST['linksLibs'])) { 
+if (!empty($_POST['linksLibs'])) {
 	$linkHead = $_POST['linkHead'];
 	$linkFooter = $_POST['linkFooter'];
 
@@ -372,11 +382,11 @@ if (!empty($_POST['linksLibs'])) {
 	);
 }
 
-if (!empty($_POST['linksController'])) { 
+if (!empty($_POST['linksController'])) {
 	$files = listDir("../../../controller/config");
 	$files = $files->branchs;
 	$filesDesc = array();
-	for ($i = 0; $i < sizeof($files); $i++) { 
+	for ($i = 0; $i < sizeof($files); $i++) {
 		array_push($filesDesc, 'include \'./config/' . $files[$i]->name . '\';');
 	}
 	setTextInFile('../../../controller/controller.php'
@@ -391,20 +401,20 @@ if (!empty($_POST['linksController'])) {
 /****************************************************************************************/
 /* Operações Arquivo */
 /****************************************************************************************/
-if (!empty($_POST['gerarArquivo'])) { 
+if (!empty($_POST['gerarArquivo'])) {
 	$file = $_POST['file'];
 	$ctx = $_POST['ctx'];
 	echo createFile($file, $ctx);
 }
 
-if (!empty($_POST['listDir'])) { 
+if (!empty($_POST['listDir'])) {
 	// echo $_POST['path'];
 	$path = $_POST['path'];
 	echo toJson(listDir($path));
 }
 
-if (!empty($_POST['limparProjeto'])) { 
-	
+if (!empty($_POST['limparProjeto'])) {
+
 }
 
 
@@ -412,7 +422,7 @@ if (!empty($_POST['limparProjeto'])) {
 /****************************************************************************************/
 /* Operações FTP */
 /****************************************************************************************/
-if (!empty($_POST['verificarDir'])) { 
+if (!empty($_POST['verificarDir'])) {
 	$dir = $_POST['dir'];
 	$is_connect = false;
 
@@ -423,17 +433,17 @@ if (!empty($_POST['verificarDir'])) {
 	$ftp_user_pass 	= $config->ftp_user_pass;
 
 	$file_list = scandir('../'.$dir);
-	foreach ($file_list as $file) { 
-		if (!is_dir("../$dir/$file") && file_exists("../$dir/$file")) { 
+	foreach ($file_list as $file) {
+		if (!is_dir("../$dir/$file") && file_exists("../$dir/$file")) {
 			// $segDiff = date('i') - date("i",filemtime($file));
 			// $segDiff < 10
 			$diff = date_diff(date_create(date('Y-m-d H:i:s')), date_create(date('Y-m-d H:i:s', filemtime("../$dir/$file"))));
 
-			if ($diff->y == 0 && $diff->m == 0 && $diff->d == 0 && $diff->h == 0 && $diff->i == 0 && $diff->s < 3) { 
-				if (!$is_connect) { 
+			if ($diff->y == 0 && $diff->m == 0 && $diff->d == 0 && $diff->h == 0 && $diff->i == 0 && $diff->s < 3) {
+				if (!$is_connect) {
 					$is_connect = true;
 					$connect = ftp_connect($ftp_host) or die( "Couldn't connect to server!!!" );
-					if (!ftp_login($connect, $ftp_user_name, $ftp_user_pass)) { 
+					if (!ftp_login($connect, $ftp_user_name, $ftp_user_pass)) {
 						echo "Couldn't connect as $ftp_user_name\n";
 						return false;
 					}
@@ -473,7 +483,7 @@ if (!empty($_POST['verificarDir'])) {
 /****************************************************************************************/
 /* Operações Block Code */
 /****************************************************************************************/
-if (!empty($_POST['getListBlockCode'])) { 
+if (!empty($_POST['getListBlockCode'])) {
 	echo toJson(listDir('./block-code'));
 }
 

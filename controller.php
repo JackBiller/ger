@@ -344,6 +344,31 @@ function replaceResolvFile($path_admin, $path, $file) {
 	return true;
 }
 
+if (!empty($_POST['installTemplate'])) {
+	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
+
+	$config_text = ctxFile('../' . $path_admin . '/config.json');
+	if ($config_text != '') {
+		$config_text = json_decode($config_text);
+		$template = '';
+		if (isset($config_text->template)) {
+			$template = $config_text->template;
+		}
+
+		$dirOrigin = '../' . $path_admin . '/template/' . $template . '/';
+		$dirDist = '../' . $path_admin . '/';
+		$dirCopy = 'principal';
+		copyDir($dirOrigin . $dirCopy, $dirDist . $dirCopy);
+		$dirCopy = 'login';
+		copyDir($dirOrigin . $dirCopy, $dirDist . $dirCopy);
+		$fileCopy = 'index.html';
+		copyFile($dirOrigin . $fileCopy, $dirDist . $fileCopy);
+		echo '1';
+	} else {
+		echo '0';
+	}
+}
+
 
 
 /****************************************************************************************/

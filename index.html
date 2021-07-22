@@ -437,6 +437,12 @@ function resolvProjetoInstalado() {
 					click: function() { gerarProducao(); },
 					title: 'Vai abrir os diretórios view e controller/config, depois verificar o que foi alterado por último',
 				},
+			},{
+				button: { 
+					desc: 'Instalar Template', icon: 'gear', class: 'btn btn-warning',
+					click: function() { installTemplate(); },
+					title: 'Vai abrir os diretórios view e controller/config, depois verificar o que foi alterado por último',
+				},
 			}
 		]}));
 		carregarConfigApp();
@@ -466,7 +472,21 @@ function gerarProducao() {
 		},
 		done: function(data) { 
 			console.log(data);
-			// alert(data == '1' ? 'Atualizado com sucesso!' : 'Falha ao atualizar: ' + data);
+			alert(data == '1' ? 'Atualizado com sucesso!' : 'Falha ao atualizar: ' + data);
+		}
+	});
+}
+
+function installTemplate() {
+	ajax({
+		param: {
+			'installTemplate': true,
+			path: projetoInstalado_Global.path,
+			path_admin: configJsonGeral_Global.path_admin,
+		},
+		done: function(data) {
+			console.log(data);
+			alert(data == '1' ? 'Instalado com sucesso!' : 'Falha ao instalar template: ' + data);
 		}
 	});
 }

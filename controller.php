@@ -354,6 +354,7 @@ if (!empty($_POST['installTemplate'])) {
 		if (isset($config_text->template)) {
 			$template = $config_text->template;
 		}
+		if ($template == '') $template = 'adminLTE';
 
 		$dirOrigin = '../' . $path_admin . '/template/' . $template . '/';
 		$dirDist = '../' . $path_admin . '/';

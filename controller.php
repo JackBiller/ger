@@ -346,6 +346,7 @@ function replaceResolvFile($path_admin, $path, $file) {
 
 if (!empty($_POST['installTemplate'])) {
 	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
+	$path = empty($_POST['path']) ? '' : $_POST['path'];
 
 	$config_text = ctxFile('../' . $path_admin . '/config.json');
 	if ($config_text != '') {
@@ -358,15 +359,55 @@ if (!empty($_POST['installTemplate'])) {
 
 		$dirOrigin = '../' . $path_admin . '/template/' . $template . '/';
 		$dirDist = '../' . $path_admin . '/';
-		$dirCopy = 'principal';
-		copyDir($dirOrigin . $dirCopy, $dirDist . $dirCopy);
-		$dirCopy = 'login';
-		copyDir($dirOrigin . $dirCopy, $dirDist . $dirCopy);
 		$fileCopy = 'index.html';
 		copyFile($dirOrigin . $fileCopy, $dirDist . $fileCopy);
+		$dirCopy = 'principal';
+		copyDir($dirOrigin . $dirCopy, $dirDist . $dirCopy);
+
+		iTemplateDirCustom($config_text, $dirOrigin, $dirDist, 'login');
+		iTemplateDirCustom($config_text, $dirOrigin, $dirDist, 'password-change');
+		iTemplateDirCustom($config_text, $dirOrigin, $dirDist, 'password-reset');
+		iTemplateDirCustom($config_text, $dirOrigin, $dirDist, 'create-user');
+
+		installFile($path_admin, $path, '/create-user/form.php'		, true);
+		installFile($path_admin, $path, '/create-user/form.js'		, true);
+		installFile($path_admin, $path, '/password-change/form.js'	, true);
 		echo '1';
 	} else {
 		echo '0';
+	}
+}
+function iTemplateDirCustom($config, $dirOrigin, $dirDist, $dir) {
+	$dirDist .= $dir;
+	removeDir($dirDist);
+
+	if (isset($config->customView) && isset($config->customView->$dir)
+		&& !empty($config->customView->$dir)
+	) {
+		mkdir($dirDist);
+		if (gettype($config->customView->$dir) == 'string') {
+			copyDir('../'.$config->customView->$dir, $dirDist);
+		} else if (
+			isset($config->customView->$dir->dir) && !empty($config->customView->$dir->dir)
+			&& (!isset($config->customView->$dir->files) || empty($config->customView->$dir->files))
+		) {
+			copyDir('../'.$config->customView->$dir->dir, $dirDist);
+		} else {
+			$dirOriginObj = '../'.$config->customView->$dir->dir;
+			$files = $config->customView->$dir->files;
+			$etx = array('html','php','phtml');
+			for ($i=0; $i < sizeof($files); $i++) {
+				$file = $files[$i];
+				$fileObj = explode('.', $file);
+
+				$fileName = (array_search($fileObj[sizeof($fileObj)-1], $etx) != '');
+				$fileName = $fileName ? 'index.'.$fileObj[sizeof($fileObj)-1] : $file;
+
+				copyFile($dirOriginObj.'/'.$file, $dirDist.'/'.$fileName);
+			}
+		}
+	} else {
+		copyDir($dirOrigin.$dir, $dirDist);
 	}
 }
 
@@ -479,7 +520,7 @@ if (!empty($_POST['verificarDir'])) {
 				$fp = fopen('php://temp', 'r+');
 				fwrite($fp, ctxFile("../$dir/$file"));
 				rewind($fp);
-				if (ftp_fput($connect, $file_up, $fp, FTP_BINARY)) {  // , FTP_ASCII
+				if (ftp_fput($connect, $file_up, $fp, FTP_BINARY)) {// , FTP_ASCII
 					$hora = date("H")-1;
 					if ($hora == 0) $hora = 23;
 					echo "<b>$dir/$file</b> foi atualizado (" . date("d/m/Y $hora:i:s") . ")<br>";
@@ -490,7 +531,7 @@ if (!empty($_POST['verificarDir'])) {
 				// $fp = fopen("../$dir/$file", 'r+');
 				// rewind($fp);
 				// if (ftp_fput($connect, "./html/$dir/$file", $fp, FTP_BINARY)){
-				// // if (ftp_fput($connect, $file_up, $fp, FTP_BINARY)){ // , FTP_ASCII
+				// // if (ftp_fput($connect, $file_up, $fp, FTP_BINARY)){// , FTP_ASCII
 				// // if (ftp_put($connect, "./html/$dir/$file", $fp, FTP_BINARY)){
 				// 	echo "$dir/$file foi atualizado<br>";
 				// } else {

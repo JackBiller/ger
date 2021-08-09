@@ -1,11 +1,11 @@
 <?php
 
-class Conexao { 
+class Conexao {
 	private static $conexao = null;
 	public $db_driver;
 	public $path = "../config.env";
 
-	function __construct($path="../config.env") { 
+	function __construct($path="../config.env") {
 		$this->path 		= $path;
 		// var_dump($path);
 		// echo file_get_contents($this->path);
@@ -17,7 +17,7 @@ class Conexao {
 		$db_senha 			= $config->db_senha;
 		$this->db_driver 	= $config->db_driver;
 
-		if ($this->db_driver == 'firebird') { 
+		if ($this->db_driver == 'firebird') {
 			$dt_encode = $config->dt_encode;
 
 			eval("
@@ -28,8 +28,8 @@ class Conexao {
 				, \$dt_encode
 			) or die(\"Ibase: Não foi possível conectar-se ao servidor [\$db_host/\$db_nome].\");");
 		}
-		if ($this->db_driver == 'mysql') { 
-			try { 
+		if ($this->db_driver == 'mysql') {
+			try {
 				# Atribui o objeto PDO à variável $conexao.
 				self::$conexao = new PDO(
 					$this->db_driver . ":host=$db_host; dbname=$db_nome"
@@ -40,15 +40,15 @@ class Conexao {
 				# Garante que o PDO lance exceções durante erros.
 				self::$conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			}
-			catch (PDOException $e) { 
+			catch (PDOException $e) {
 				# Então não carrega nada mais da página.
 				echo 'ERROR: ' . $e->getMessage();
 			}
 		}
-		if ($this->db_driver == 'sqlsrv') { 
+		if ($this->db_driver == 'sqlsrv') {
 			$db_instancia 	= $config->db_instancia;
 			$dt_port 		= $config->db_port;
-			try { 
+			try {
 				self::$conexao = new PDO(
 					$this->db_driver . ":Server={$db_host}\\{$db_instancia},{$dt_port};Database={$db_nome}"
 					, $db_usuario
@@ -56,7 +56,7 @@ class Conexao {
 					, array(PDO::SQLSRV_ENCODING_UTF8 => 1)
 				);
 			}
-			catch (PDOException $e) { 
+			catch (PDOException $e) {
 				// echo "Drivers disponiveis: " . implode( ",", PDO::getAvailableDrivers() );
 				echo 'ERROR: ' . $e->getMessage();
 			}
@@ -66,29 +66,29 @@ class Conexao {
 
 	public function __wakeup() {}
 
-	public static function Connect() { 
-		if (!isset(self::$conexao)) { 
+	public static function Connect() {
+		if (!isset(self::$conexao)) {
 			eval("new Conexao(\$this->path);");
 		}
 		return self::$conexao;
 	}
 }
 
-class PadraoObjeto { 
+class PadraoObjeto {
 	var $debug = 'OK';
-	public function get($nome_campo) { 
+	public function get($nome_campo) {
 		return $this->$nome_campo;
 	}
 
-	public function set($valor , $nome_campo) { 
+	public function set($valor , $nome_campo) {
 		$this->$nome_campo = $valor;
 	}
 
-	public function check($nome_campo) { 
+	public function check($nome_campo) {
 		return isset($this->$nome_campo);
 	}
 
-	public function push($valor, $nome_campo) { 
+	public function push($valor, $nome_campo) {
 		if (gettype($this->$nome_campo) == "array") array_push($this->$nome_campo, $valor);
 	}
 
@@ -101,29 +101,29 @@ class PadraoObjeto {
 										str_replace("\n", '', $valor));
 	}
 
-	public function setOptions($option = array()) { 
-		foreach ($option as $key => $value) { 
+	public function setOptions($option = array()) {
+		foreach ($option as $key => $value) {
 			$this->$key = $value;
 		}
 	}
 }
 
-class FalseDebug extends PadraoObjeto { 
-	public function __construct($msm) { 
+class FalseDebug extends PadraoObjeto {
+	public function __construct($msm) {
 		if (!empty($msm) && gettype($msm) == 'string') $this->set($msm, 'debug');
 	}
 }
 
-class Generico extends PadraoObjeto { 
+class Generico extends PadraoObjeto {
 	var $variable = array('debug');
 	var $debug = "OK";
 	var $firebird = false;
 
-	public function __construct($row, $firebird=false) { 
+	public function __construct($row, $firebird=false) {
 		$this->firebird = $firebird;
 		$contIten = 0;
-		while (current($row) !== false) { 
-			if ($contIten % 2 == 0 || $this->get('firebird')) { 
+		while (current($row) !== false) {
+			if ($contIten % 2 == 0 || $this->get('firebird')) {
 				$keys = key($row);
 				$valor = $this->get('firebird') ? $row->$keys : $row[$keys];
 				// if (!in_array($keys, $variable)) array_push($variable, $keys);
@@ -136,13 +136,13 @@ class Generico extends PadraoObjeto {
 	}
 }
 
-function getConection($path='../config.env') { 
+function getConection($path='../config.env') {
 	$conn = new Conexao($path);
 	return $conn->Connect();
 }
 
-function getQuery($pdo, $sql) { 
-	if (gettype($sql) == 'object') { 
+function getQuery($pdo, $sql) {
+	if (gettype($sql) == 'object') {
 		$driveDB = gettype($pdo) == 'resource' ? 'Firebird' : $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 		$driveDB = str_replace('sqlsrv', 'SQLServer', $driveDB);
 		$driveDB = str_replace('mysql', 'MySQL', $driveDB);
@@ -154,19 +154,19 @@ function getQuery($pdo, $sql) {
 	return $sql;
 }
 
-function padraoResultado($pdo, $sql, $msm='Nenhum resultado encontrado!') { 
+function padraoResultado($pdo, $sql, $msm='Nenhum resultado encontrado!') {
 	$sql = getQuery($pdo, $sql);
 	$arrayResultado = array();
 
-	if (gettype($pdo) == 'resource') { 
+	if (gettype($pdo) == 'resource') {
 		eval("
 		\$resultado = ibase_query(\$pdo, \$sql);
 		\$row = ibase_fetch_object(\$resultado);
 		if (empty(\$row)) 	array_push(\$arrayResultado, new FalseDebug(\$msm));
 		else 			do 	array_push(\$arrayResultado, new Generico(\$row, true)); while(\$row = ibase_fetch_object(\$resultado));");
-	} else { 
+	} else {
 		$verifica = $pdo->query($sql);
-		foreach ($verifica as $dados) { 
+		foreach ($verifica as $dados) {
 			array_push($arrayResultado, new Generico($dados));
 		}
 		if (sizeof($arrayResultado) == 0) array_push($arrayResultado, new FalseDebug($msm));
@@ -174,26 +174,26 @@ function padraoResultado($pdo, $sql, $msm='Nenhum resultado encontrado!') {
 	return $arrayResultado;
 }
 
-function padraoExecute($pdo, $sql, $table='') { 
+function padraoExecute($pdo, $sql, $table='') {
 	$sql = getQuery($pdo, $sql);
 
-	if (gettype($pdo) == 'resource') { 
+	if (gettype($pdo) == 'resource') {
 		eval("
 		\$resultado = ibase_query(\$pdo, \$sql);
 		COMMIT_WORK(\$pdo);
-		if (\$table) { 
+		if (\$table) {
 			\$resultado = ibase_fetch_row(\$resultado);
 			\$resultado = \$resultado['0'];
 		};");
-	} else { 
+	} else {
 		$stmt = $pdo->prepare($sql);
 		$resultado = $stmt->execute();
-		if ($table != '' && $resultado == 1) { 
+		if ($table != '' && $resultado == 1) {
 			// $resultado = "SELECT ID_$table FROM $table ORDER BY ID_$table DESC LIMIT 1";
-			if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) == 'sqlsrv') { 
+			if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) == 'sqlsrv') {
 				// $resultado = "SELECT SCOPE_IDENTITY() AS ID";
 				$resultado = "SELECT @@IDENTITY AS ID";
-			} else { 
+			} else {
 				$resultado = "SELECT LAST_INSERT_ID();";
 			}
 			$verifica = $pdo->query($resultado);
@@ -203,38 +203,38 @@ function padraoExecute($pdo, $sql, $table='') {
 	return $resultado;
 }
 
-function COMMIT_WORK($pdo) { 
+function COMMIT_WORK($pdo) {
 	eval("\$resultado = ibase_query(\$pdo, \"COMMIT WORK;\");");
 }
 
-function printQuery($sql, $isHtml=false, $boolComentario=false) { 
+function printQuery($sql, $isHtml=false, $boolComentario=false) {
 	$sql = explode("\n", str_replace("\r", '', str_replace("\t", "    ", $sql)));
 
-	for ($i=0; $i < sizeof($sql); $i++) { 
+	for ($i=0; $i < sizeof($sql); $i++) {
 		// remover comentario
-		if (!$boolComentario) { 
-			if (strpos($sql[$i], "--") != '') { 
+		if (!$boolComentario) {
+			if (strpos($sql[$i], "--") != '') {
 				$sql[$i] = explode('--', $sql[$i]);
 				$sql[$i] = $sql[$i][0];
 			}
 		}
 		// remover espaço no final da linha
-		while (substr($sql[$i], strlen($sql[$i])-1, 1) == ' ') { 
+		while (substr($sql[$i], strlen($sql[$i])-1, 1) == ' ') {
 			$sql[$i] = substr($sql[$i], 0, strlen($sql[$i])-1);
 		}
 		// remover linhas vazias
-		if ($sql[$i] == '') { 
+		if ($sql[$i] == '') {
 			array_splice($sql, $i, 1);
 			$i--;
 		}
 	}
 	// calcular identação do codigo
 	$space = -1;
-	for ($i=1; $i < sizeof($sql); $i++) { 
-		if ($sql[$i] != '') { 
+	for ($i=1; $i < sizeof($sql); $i++) {
+		if ($sql[$i] != '') {
 			$bls = explode(' ', $sql[$i]);
 			$spaceTemp = 0;
-			for ($j=0; $j < sizeof($bls); $j++) { 
+			for ($j=0; $j < sizeof($bls); $j++) {
 				if ($bls[$j] == '') 	$spaceTemp++;
 				else 					$j = sizeof($bls);
 			}
@@ -242,13 +242,13 @@ function printQuery($sql, $isHtml=false, $boolComentario=false) {
 		}
 	}
 	// retirnar a identação do codigo
-	for ($i=1; $i < sizeof($sql); $i++) { 
+	for ($i=1; $i < sizeof($sql); $i++) {
 		$sql[$i] = substr($sql[$i], $space, strlen($sql[$i]));
 	}
 	$sql = implode("\n", $sql);
 
 	// formata para HTML
-	if ($isHtml) { 
+	if ($isHtml) {
 		$sql = 
 			str_replace("    ", '&nbsp;&nbsp;&nbsp;&nbsp;',
 			str_replace("\n", "<br>", 
@@ -257,7 +257,7 @@ function printQuery($sql, $isHtml=false, $boolComentario=false) {
 	echo $sql;
 }
 
-function eviarEmail($title, $body, $email) { 
+function eviarEmail($title, $body, $email) {
 	// require('../biblioteca/PHPMailer/class.phpmailer.php');
 
 	$EMAIL_ENVIO_AUTOMATICO 		= 'email';
@@ -287,21 +287,21 @@ function eviarEmail($title, $body, $email) {
 	return $mail->Send() ? '1' : '0';
 }
 
-function in_comando($comando, $usuario='') { 
-	if ($usuario == '') { 
+function in_comando($comando, $usuario='') {
+	if ($usuario == '') {
 		global $usuario_Global;
 		$usuario = $usuario_Global;
 	}
 	return in_array($comando, explode(',', $usuario->get('COMANDO')));
 }
 
-function tratarParam($text) { 
+function tratarParam($text) {
 	$text = str_replace("'", "\\'", str_replace("\"", "\\\"",$text));
 	return $text;
 }
 
-function letraMaiuscula($letra) { 
-	switch ($letra) { 
+function letraMaiuscula($letra) {
+	switch ($letra) {
 		case 'a': $letra = 'A'; break;
 		case 'b': $letra = 'B'; break;
 		case 'c': $letra = 'C'; break;
@@ -334,17 +334,17 @@ function letraMaiuscula($letra) {
 	return $letra;
 }
 
-function formatarNomeHeadTable($nome) { 
+function formatarNomeHeadTable($nome) {
 	$nome = str_replace("-", "_-_", $nome);
 	$nomeVetor = explode("_",$nome);
-	for ($i=0; $i < (count($nomeVetor) - 1); $i++) { 
-		if ($i == 0) { 
+	for ($i=0; $i < (count($nomeVetor) - 1); $i++) {
+		if ($i == 0) {
 			$nome = corretor(
 						letraMaiuscula(
 							substr($nomeVetor[$i], 0, 1)).substr($nomeVetor[$i], 1, strlen($nomeVetor[$i])
 						)
 					);
-		} else { 
+		} else {
 			$nome .= " ".corretor(
 							letraMaiuscula(
 								substr($nomeVetor[$i], 0, 1)).substr($nomeVetor[$i], 1, strlen($nomeVetor[$i])
@@ -355,17 +355,17 @@ function formatarNomeHeadTable($nome) {
 	return $nome;
 }
 
-function formatarNomeHeadTable2($nome) { 
+function formatarNomeHeadTable2($nome) {
 	$nome = str_replace("-", "_-_", $nome);
 	$nomeVetor = explode("_",$nome);
-	for ($i=0; $i < sizeof($nomeVetor); $i++) { 
-		if ($i == 0) { 
+	for ($i=0; $i < sizeof($nomeVetor); $i++) {
+		if ($i == 0) {
 			$nome = corretor(
 						letraMaiuscula(
 							substr($nomeVetor[$i], 0, 1)).substr($nomeVetor[$i], 1, strlen($nomeVetor[$i])
 						)
 					);
-		} else { 
+		} else {
 			$nome .= " ".corretor(
 							letraMaiuscula(
 								substr($nomeVetor[$i], 0, 1)).substr($nomeVetor[$i], 1, strlen($nomeVetor[$i])
@@ -376,40 +376,40 @@ function formatarNomeHeadTable2($nome) {
 	return $nome;
 }
 
-function formatarNomeCampo($nomeCampo, $qtdTirarUltimo) { 
+function formatarNomeCampo($nomeCampo, $qtdTirarUltimo) {
 	$arrayNomeCampo = explode("_", $nomeCampo);
 	$nomeCampo = "";
-	if (sizeof($arrayNomeCampo)-$qtdTirarUltimo > 0) { 
-		for ($i=0; $i < sizeof($arrayNomeCampo)-$qtdTirarUltimo; $i++) { 
+	if (sizeof($arrayNomeCampo)-$qtdTirarUltimo > 0) {
+		for ($i=0; $i < sizeof($arrayNomeCampo)-$qtdTirarUltimo; $i++) {
 			$nomeCampo .= $i == 0 ? $arrayNomeCampo[$i] : "_".$arrayNomeCampo[$i];
 		}
 	}
 	return $nomeCampo;
 }
 
-function juntaTodosMenosPrimeiro($array) { 
+function juntaTodosMenosPrimeiro($array) {
 	$resultado = "";
 	$cont = 0;
-	for ($i = 1; $i < sizeof($array); $i++) { 
+	for ($i = 1; $i < sizeof($array); $i++) {
 		$resultado .= $cont == 0 ? $array[$i] : " ".$array[$i];
 		$cont++;
 	}
 	return $resultado;
 }
 
-function retornaUltimaPosicao($array) { 
+function retornaUltimaPosicao($array) {
 	$resultado = "";
-	for ($i=sizeof($array)-1; $i >= 0; $i--) { 
+	for ($i=sizeof($array)-1; $i >= 0; $i--) {
 		$resultado = $array[$i];
 		$i = -1;
 	}
 	return $resultado;
 }
 
-function corretor($palavra) { 
+function corretor($palavra) {
 	$preDirectory = "";
 	$tentativas = 5;
-	for ($i=0; $i < $tentativas; $i++) { 
+	for ($i=0; $i < $tentativas; $i++) {
 		if (is_dir($preDirectory."Dicionario")): $preDirectory .= "Dicionario"; $i = $tentativas; endif;
 		$preDirectory .= "../";
 	}
@@ -421,20 +421,21 @@ function corretor($palavra) {
 /**********************************************************************************************/
 /* FUNÇÕES PARA ARQUIVOS E DIRETORIOS */
 /**********************************************************************************************/
-class Dir extends PadraoObjeto { 
+class Dir extends PadraoObjeto {
 	var $name;
 	var $branchs = array();
 	var $isFile = false;
 
-	function __construct($name) { 
+	function __construct($name) {
 		$this->name = $name;
 	}
 }
 
-class File extends PadraoObjeto { 
+class File extends PadraoObjeto {
 	var $name;
 	var $path;
 	var $dateCriation;
+	var $dateCreation;
 	var $isFile = true;
 	var $ext;
 	var $height;
@@ -446,14 +447,14 @@ class File extends PadraoObjeto {
 	}
 }
 
-function createFile($name, $ctx) { 
+function createFile($name, $ctx) {
 	$myfile = fopen($name, "w") or die("Unable to open file!");
 	fwrite($myfile, $ctx);
 	fclose($myfile);
 	return 1;
 }
 
-function ctxFile($file) { 
+function ctxFile($file) {
 	if (!is_file($file)) return '';
 	$myfile = fopen($file, "r") or die("Unable to open file!");
 	$ctx = fread($myfile,filesize($file));
@@ -461,44 +462,48 @@ function ctxFile($file) {
 	return $ctx;
 }
 
-function copyFile($origin, $dist) { 
+function copyFile($origin, $dist) {
 	$file = ctxFile($origin);
 	return createFile($dist, $file);
 }
 
-function mergeFile($origin1, $origin2, $file) { 
+function mergeFile($origin1, $origin2, $file) {
+	if (!is_file($origin1.'/'.$file) && !is_file($origin2.'/'.$file)) {
+		return false;
+	}
 	$filObj1 = getObjFile($file,$origin1);
 	$filObj2 = getObjFile($file,$origin2);
 
-	// echo $filObj1->get('dateCriation');
-	// echo $filObj1->get('dateCriation');
+	// echo $filObj1->get('dateCreation');
+	// echo $filObj1->get('dateCreation');
 
-	$diff = getDateMaior($filObj1->get('dateCriation'), $filObj2->get('dateCriation'));
-	if ($diff == 0) { 
+	$diff = getDateMaior($filObj1->get('dateCreation'), $filObj2->get('dateCreation'));
+	if ($diff == 0) {
 		copyFile($origin1.$file, $origin2.$file);
-	} else { 
+	} else {
 		copyFile($origin2.$file, $origin1.$file);
 	}
 }
 
-function getObjFile($file,$path) { 
+function getObjFile($file,$path) {
 	$filObj = new File($file, $path.'/'.$file);
 	$filObj->set(
 		(is_file($path.'/'.$file) ? date('Y-m-d H:i:s', filemtime($path.'/'.$file)) : '1950-01-01 00:00:00')
-		, 'dateCriation'
+		, 'dateCreation'
 	);
+	$filObj->set($filObj->get('dateCreation'), 'dateCriation');
 	return $filObj;
 }
 
-function listDir($path) { 
+function listDir($path) {
 	$dir = new Dir($path);
-	if (is_dir($path)) { 
+	if (is_dir($path)) {
 		$diretorio = dir($path);
-		while ($file = $diretorio->read()) { 
-			if ($file != '.' && $file != '..') { 
-				if (is_dir($path.'/'.$file)) { 
+		while ($file = $diretorio->read()) {
+			if ($file != '.' && $file != '..') {
+				if (is_dir($path.'/'.$file)) {
 					$dir->push(listDir($path.'/'.$file), 'branchs');
-				} else { 
+				} else {
 					$ext = explode('.', $file);
 					array_splice($ext, 0,-1);
 					$ext = implode('', $ext);
@@ -506,7 +511,7 @@ function listDir($path) {
 					$filObj = getObjFile($file,$path);
 
 					$extsImgs = explode(',','PNG,JPG,TIFF,JPEG,BMP,PSD,EXIF,RAW,PDF,WEBP,GIF,EPS,SVG');
-					if (in_array(strtoupper($ext), $extsImgs) && $size = getimagesize($path.'/'.$file)) { 
+					if (in_array(strtoupper($ext), $extsImgs) && $size = getimagesize($path.'/'.$file)) {
 						list($width, $height) = $size;
 						$filObj->set($height, 'height');
 						$filObj->set($width, 'width');
@@ -516,26 +521,28 @@ function listDir($path) {
 				}
 			}
 		}
-	} else { 
+	} else {
 		$dir->set('Not Dir', 'name');
 	}
 	return $dir;
 }
 
-function copyDir($dirOrigin, $dirDist) { 
-	if (is_dir($dirOrigin)) { 
+function copyDir($dirOrigin, $dirDist) {
+	if (is_dir($dirOrigin)) {
 		if (!is_dir($dirDist)) mkdir($dirDist);
 
 		$objects = scandir($dirOrigin);
-		foreach ($objects as $object) { 
-			if ($object != '.' && $object != '..') { 
-				if (is_dir($dirOrigin . DIRECTORY_SEPARATOR . $object)) { 
-					mkdir($dirDist . DIRECTORY_SEPARATOR . $object);
-					copyDir(
-						$dirOrigin . DIRECTORY_SEPARATOR . $object, 
-						$dirDist . DIRECTORY_SEPARATOR . $object
-					);
-				} else if (is_file($dirOrigin . DIRECTORY_SEPARATOR . $object)) { 
+		foreach ($objects as $object) {
+			if ($object != '.' && $object != '..') {
+				if (is_dir($dirOrigin . DIRECTORY_SEPARATOR . $object)) {
+					if ($object != '.git') {
+						mkdir($dirDist . DIRECTORY_SEPARATOR . $object);
+						copyDir(
+							$dirOrigin . DIRECTORY_SEPARATOR . $object, 
+							$dirDist . DIRECTORY_SEPARATOR . $object
+						);
+					}
+				} else if (is_file($dirOrigin . DIRECTORY_SEPARATOR . $object)) {
 					copyFile(
 						$dirOrigin . DIRECTORY_SEPARATOR . $object, 
 						$dirDist . DIRECTORY_SEPARATOR . $object
@@ -546,30 +553,30 @@ function copyDir($dirOrigin, $dirDist) {
 	}
 }
 
-function mergeDir($path1, $path2) { 
+function mergeDir($path1, $path2) {
 	if (!is_dir($path1)) mkdir($path1);
 	if (!is_dir($path2)) mkdir($path2);
 
 	$objects = scandir($path1);
-	foreach ($objects as $object) { 
+	foreach ($objects as $object) {
 		mergeActionDir($path1, $path2, $object);
 	}
 
 	$objects = scandir($path2);
-	foreach ($objects as $object) { 
+	foreach ($objects as $object) {
 		mergeActionDir($path2, $path1, $object);
 	}
 }
 
-function mergeActionDir($path1, $path2, $object) { 
-	if ($object != '.' && $object != '..') { 
-		if (is_dir($path1 . DIRECTORY_SEPARATOR . $object)) { 
+function mergeActionDir($path1, $path2, $object) {
+	if ($object != '.' && $object != '..') {
+		if (is_dir($path1 . DIRECTORY_SEPARATOR . $object)) {
 			mkdir($path2 . DIRECTORY_SEPARATOR . $object);
 			mergeDir(
 				$path1 . DIRECTORY_SEPARATOR . $object, 
 				$path2 . DIRECTORY_SEPARATOR . $object
 			);
-		} else if (is_file($path1 . DIRECTORY_SEPARATOR . $object)) { 
+		} else if (is_file($path1 . DIRECTORY_SEPARATOR . $object)) {
 			mergeFile(
 				$path1 . DIRECTORY_SEPARATOR, 
 				$path2 . DIRECTORY_SEPARATOR,
@@ -579,19 +586,19 @@ function mergeActionDir($path1, $path2, $object) {
 	}
 }
 
-function removeDir($dir) { 
-	if (is_dir($dir)) { 
+function removeDir($dir) {
+	if (is_dir($dir)) {
 		$objects = scandir($dir);
-		foreach ($objects as $object) { 
-			if ($object != '.' && $object != '..') { 
-				if (is_dir($dir . DIRECTORY_SEPARATOR . $object)) { 
+		foreach ($objects as $object) {
+			if ($object != '.' && $object != '..') {
+				if (is_dir($dir . DIRECTORY_SEPARATOR . $object)) {
 					removeDir($dir . DIRECTORY_SEPARATOR . $object);
-				} else if (is_file($dir . DIRECTORY_SEPARATOR . $object)) { 
-					if (!unlink($dir . DIRECTORY_SEPARATOR . $object)) { 
+				} else if (is_file($dir . DIRECTORY_SEPARATOR . $object)) {
+					if (!unlink($dir . DIRECTORY_SEPARATOR . $object)) {
 						// code in case the file was not removed
 					}
 					// wait a bit here?
-				} else { 
+				} else {
 					// code for debug file permission issues
 				}
 			}
@@ -601,12 +608,12 @@ function removeDir($dir) {
 	}
 }
 
-function deleteFile($file) { 
+function deleteFile($file) {
 	if (!is_file($file)) return '';
 	return unlink($file);
 }
 
-function setTextInFile($path, $text, $start, $end) { 
+function setTextInFile($path, $text, $start, $end) {
 	$file = ctxFile($path);
 	$file = explode($start, $file);
 	$pre = $file[0];
@@ -617,7 +624,7 @@ function setTextInFile($path, $text, $start, $end) {
 	createFile($path, $file);
 }
 
-function getTextInFile($path, $start, $end) { 
+function getTextInFile($path, $start, $end) {
 	$file = ctxFile($path);
 	$file = explode($start, $file);
 	$text = $file[1];
@@ -626,12 +633,12 @@ function getTextInFile($path, $start, $end) {
 	return $text;
 }
 
-function resolvPath($path) { 
+function resolvPath($path) {
 	$path = explode('/', $path);
 	$pathNew = '';
-	for ($i = 0; $i < sizeof($path); $i++) { 
+	for ($i = 0; $i < sizeof($path); $i++) {
 		$pathNew .= ($i == 0 ? '' : '/') . $path[$i];
-		if ($path[$i] != '.' && $path[$i] != '..' && $path[$i] != '' && !is_dir($pathNew)) { 
+		if ($path[$i] != '.' && $path[$i] != '..' && $path[$i] != '' && !is_dir($pathNew)) {
 			mkdir($pathNew);
 		}
 	}
@@ -641,7 +648,7 @@ function resolvPath($path) {
 /**********************************************************************************************/
 /* FUNÇÕES PARA OBJETOS JSON */
 /**********************************************************************************************/
-function toJson($variavel) { 
+function toJson($variavel) {
 	$resultado = $variavel;
 		 if (gettype($variavel) == 'object') $resultado = objectEmJson($variavel);
 	else if (gettype($variavel) == 'array' ) $resultado = arrayEmJson($variavel);
@@ -649,20 +656,20 @@ function toJson($variavel) {
 	return $resultado;
 }
 
-function objectEmJson($objeto) { 
+function objectEmJson($objeto) {
 	$class_vars = get_class_vars(get_class($objeto));
 	$arrayObjeto = array();
 	$namesClass = array();
 
 	$indiceVariable = -1;
-	foreach ($class_vars as $name => $value) { 
+	foreach ($class_vars as $name => $value) {
 		if ($name == 'variable') $indiceVariable = sizeof($namesClass);
 		array_push($namesClass, $name);
 	}
 
 	if ($indiceVariable != -1) $namesClass = $objeto->get($namesClass[$indiceVariable]);
 
-	for ($i=0; $i < sizeof($namesClass); $i++) { 
+	for ($i=0; $i < sizeof($namesClass); $i++) {
 		array_push($arrayObjeto, $namesClass[$i], $objeto->get($namesClass[$i]));
 	}
 
@@ -670,13 +677,13 @@ function objectEmJson($objeto) {
 	$primeiro = true;
 	$stringArray = "";
 	$preStringArray = "";
-	foreach ($arrayObjeto as $key => $value) { 
-		if ($verifica) { 
+	foreach ($arrayObjeto as $key => $value) {
+		if ($verifica) {
 			if ($primeiro) 	$preStringArray = "{\"".$value."\":";
 			else 			$preStringArray = ",\"".$value."\":";
 			$verifica = false;
-		} else { 
-			switch (gettype($value)) { 
+		} else {
+			switch (gettype($value)) {
 				case 'string':
 					$stringArray .= $preStringArray."\"".$value."\"";
 					break;
@@ -711,12 +718,12 @@ function objectEmJson($objeto) {
 	return $stringArray."}";
 }
 
-function arrayEmJson($array) { 
+function arrayEmJson($array) {
 	$stringArray = "[";
 	$primeiro = true;
 
-	foreach ($array as $key => $value) { 
-		switch (gettype($value)) { 
+	foreach ($array as $key => $value) {
+		switch (gettype($value)) {
 			case 'string':
 				if ($primeiro) 	$stringArray .= "\"".$value."\"";
 				else 			$stringArray .= ",\"".$value."\"";
@@ -764,36 +771,36 @@ function arrayEmJson($array) {
 /* OUTRAS FUNÇÕES DO ARQUIVO SANHIDREL funcoes.php */
 /**********************************************************************************************/
 /** FUNÇÕES COM DATAS */
-function getDateMaior($data1, $data2) { 
+function getDateMaior($data1, $data2) {
 	return strtotime($data1) > strtotime($data2) ? 0 : 1; // Comparando as Datas
 }
 
-function formataDatUN($dataUN) { 
+function formataDatUN($dataUN) {
 	return implode("/", array_reverse(explode("-", $dataUN)));
 }
 
-function formataDataBR($dataBR) { 
+function formataDataBR($dataBR) {
 	return implode("-", array_reverse(explode("/", $dataBR)));
 }
 
-function formatarDataMes($dataBR) { 
+function formatarDataMes($dataBR) {
 	$dataBR = explode('/', $dataBR);
 	return retornaMes($dataBR[1], 'abr') . "/" . $dataBR[2];
 }
 
-function formatarDataMesUN($dataUN) { 
+function formatarDataMesUN($dataUN) {
 	$dataUN = explode('-', $dataUN);
 	return  $dataUN[0] . "-" . retornaMes($dataUN[1], 'abr');
 }
 
-function formatarDataPadraoAmericano($data) { 
+function formatarDataPadraoAmericano($data) {
 		 if (strpos($data, '.')) 	return implode('-', array_reverse(explode('.', $data)));
 	else if (strpos($data, '/'))	return implode('-', array_reverse(explode('/', $data)));
 	else 							return $data;
 }
 
-function retornaMes($mes, $tipo) { 
-	switch ($mes) { 
+function retornaMes($mes, $tipo) {
+	switch ($mes) {
 		case  1: 	$mes = $tipo == 'abr' ? 'Jan' : 'Janeiro'; 		break;
 		case  2: 	$mes = $tipo == 'abr' ? 'Fev' : 'Fevereiro'; 	break;
 		case  3: 	$mes = $tipo == 'abr' ? 'Mar' : 'Março'; 		break;
@@ -810,10 +817,10 @@ function retornaMes($mes, $tipo) {
 	return $mes;
 }
 
-function ordernarArray($array) { 
-	for ($i=0; $i < sizeof($array); $i++) { 
+function ordernarArray($array) {
+	for ($i=0; $i < sizeof($array); $i++) {
 		$dataAtual = $array[$i];
-		for ($x=$i+1; $x < sizeof($array); $x++) { 
+		for ($x=$i+1; $x < sizeof($array); $x++) {
 			if ($dataAtual > $array[$x]) {
 				$novaData = $dataAtual;
 				$array[$i] = $array[$x];
@@ -825,23 +832,23 @@ function ordernarArray($array) {
 	return $array;
 }
 
-function removerEspacoDuplo($str) { 
+function removerEspacoDuplo($str) {
 	while(strpos($str,"  ")) $str = str_replace("  ", " ", $str);
 	return $str;
 }
 
-function formataParaQuery($texto, $tabelaSql, $campoSql) { 
+function formataParaQuery($texto, $tabelaSql, $campoSql) {
 	$texto = explode(" ", $texto);
 	$descricaoCompleta = "";
-	for ($i=0; $i < sizeof($texto); $i++) { 
-		if ($texto[$i] != "") { 
-			if ($campoSql == "DS_MARCA") { 
+	for ($i=0; $i < sizeof($texto); $i++) {
+		if ($texto[$i] != "") {
+			if ($campoSql == "DS_MARCA") {
 				$descricaoCompleta .= "
 					$tabelaSql.$campoSql LIKE '%' || UPPER('" . $texto[$i] . "') || '%'";
-			} else if ($campoSql == "SIGLA_MARCA") { 
+			} else if ($campoSql == "SIGLA_MARCA") {
 				$descricaoCompleta .= "
 					OR $tabelaSql.$campoSql LIKE '%' || UPPER('" . $texto[$i] . "') || '%'";
-			} else { 
+			} else {
 				$descricaoCompleta .= "
 					AND $tabelaSql.$campoSql LIKE '%' || UPPER('" . $texto[$i] . "') || '%'";
 			}
@@ -851,7 +858,7 @@ function formataParaQuery($texto, $tabelaSql, $campoSql) {
 	return $texto;
 }
 
-function sanitizeString($str) { 
+function sanitizeString($str) {
 	header('Content-type: text/html; charset=ISO-8859-1');
 	$str = preg_replace('/[áàãâä]/ui', 'a', $str);
 	$str = preg_replace('/[éèêë]/ui', 'e', $str);
@@ -867,7 +874,7 @@ function sanitizeString($str) {
 	return $str;
 }
 
-function retirarAcento($texto) { 
+function retirarAcento($texto) {
 	// header('Content-type: text/html; charset=ISO-8859-1');
 	$texto = str_replace("À", "A", $texto);
 	$texto = str_replace("Á", "A", $texto);
@@ -991,7 +998,7 @@ function retirarAcento($texto) {
 	return $texto;
 }
 
-function decodificarUtf8($texto) { 
+function decodificarUtf8($texto) {
 	$texto = str_replace("â‚¬", "€", $texto);
 	$texto = str_replace("â€š", "‚", $texto);
 	$texto = str_replace("â€ž", "„", $texto);
@@ -1119,25 +1126,25 @@ function decodificarUtf8($texto) {
 	return $texto;
 }
 
-function criptografar($chave) { 
+function criptografar($chave) {
 	$chave = "$chave"; $num = "";
-	for ($i = 0; $i < strlen($chave); $i++) { 
+	for ($i = 0; $i < strlen($chave); $i++) {
 		$num .= subNumCrip($chave[$i]);
 	}
 	return parseHex($num);
 }
 
-function descriptografar($codigo, $chave) { 
+function descriptografar($codigo, $chave) {
 	$codigoQuebra = parseDec($codigo); $codigo = "";
-	while (strlen($codigoQuebra) >= $chave) { 
+	while (strlen($codigoQuebra) >= $chave) {
 		$codigo .= subNumDesCrip(substr($codigoQuebra, 0, $chave));
 		$codigoQuebra = substr($codigoQuebra, $chave, strlen($codigoQuebra));
 	}
 	return $codigo;
 }
 
-function subNumCrip($num) { 
-	switch ($num) { 
+function subNumCrip($num) {
+	switch ($num) {
 		case 0: $num = 21; break;
 		case 1: $num = 42; break;
 		case 2: $num = 59; break;
@@ -1152,8 +1159,8 @@ function subNumCrip($num) {
 	return $num;
 }
 
-function subNumDesCrip($num) { 
-	switch ($num) { 
+function subNumDesCrip($num) {
+	switch ($num) {
 		case 21: $num = 0; break;
 		case 42: $num = 1; break;
 		case 59: $num = 2; break;
@@ -1168,9 +1175,9 @@ function subNumDesCrip($num) {
 	return $num;
 }
 
-function parseHex($num) { 
+function parseHex($num) {
 	$hex = ""; $hexVez = "";
-	while ($num >= 16) { 
+	while ($num >= 16) {
 		$hexVez = ($num % 16);
 		$num = (int) ($num / 16);
 		$hex .= validaAcimaDez($hexVez);
@@ -1178,8 +1185,8 @@ function parseHex($num) {
 	return $hex . validaAcimaDez($num);
 }
 
-function validaAcimaDez($num) { 
-	switch ($num) { 
+function validaAcimaDez($num) {
+	switch ($num) {
 		case 10: $num = 'A'; break;
 		case 11: $num = 'B'; break;
 		case 12: $num = 'C'; break;
@@ -1190,10 +1197,10 @@ function validaAcimaDez($num) {
 	return $num;
 }
 
-function parseDec($hex) { 
+function parseDec($hex) {
 	$numVez = 0; $num = 0;
-	for ($i = 0; $i < strlen($hex); $i++) { 
-		switch ($hex[$i]) { 
+	for ($i = 0; $i < strlen($hex); $i++) {
+		switch ($hex[$i]) {
 			case 'A': $numVez = 10; break;
 			case 'B': $numVez = 11; break;
 			case 'C': $numVez = 12; break;
@@ -1207,7 +1214,7 @@ function parseDec($hex) {
 	return $num;
 }
 
-function pot($num, $exp) { 
+function pot($num, $exp) {
 	$total = 1;
 	for ($i = 0; $i < $exp; $i++) $total *= $num;
 	return $total;

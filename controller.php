@@ -147,6 +147,9 @@ if (!empty($_POST['instalar_projeto'])) {
 	installFile($path, $path_admin, '/principal/_skin-custom.css'		);
 	installFile($path, $path_admin, '/config.json'						);
 	installFile($path, $path_admin, '/config.env'						);
+	if (is_file('../' . $path . '/configProd.env')) {
+		installFile($path, $path_admin, '/configProd.env');
+	}
 	installFile($path, $path_admin, '/composer.json'					);
 
 	echo '1';
@@ -185,6 +188,9 @@ if (!empty($_POST['atualizarOrigemRepo'])) {
 	installFile($path, $path_admin, '/principal/_skin-custom.css'		, true);
 	installFile($path_admin, $path, '/config.json'						, true);
 	installFile($path_admin, $path, '/config.env'						, true);
+	if (is_file('../' . $path . '/configProd.env')) {
+		installFile($path_admin, $path, '/configProd.env'				, true);
+	}
 	installFile($path_admin, $path, '/composer.json'					, true);
 
 	echo '1';
@@ -237,7 +243,11 @@ if (!empty($_POST['gerarProducao'])) {
 	copyDir('../' . $path_admin . '/img'						, '../' . $path_admin . '/dist/img'						);
 	copyDir('../' . $path_admin . '/controller'					, '../' . $path_admin . '/dist/controller'				);
 
-	$configEnv_text = ctxFile('../' . $path_admin . '/config.env');
+	$configEnv_text = ctxFile(
+		is_file('../' . $path_admin . '/configProd.env')
+		? '../' . $path_admin . '/configProd.env'
+		: '../' . $path_admin . '/config.env'
+	);
 	$config_text 	= ctxFile('../' . $path_admin . '/config.json');
 	$config = json_decode($config_text);
 

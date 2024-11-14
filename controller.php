@@ -126,9 +126,9 @@ if (!empty($_POST['abrir_projeto'])) {
 }
 
 if (!empty($_POST['instalar_projeto'])) {
-	$path_root = empty($_POST['path_root']) ? 'C:/xampp/htdocs/' : $_POST['path_root'];
-	$path_admin = empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
-	$path = empty($_POST['path']) ? '' : $_POST['path'];
+	$path_root 		= empty($_POST['path_root']) ? 'C:/xampp/htdocs/' : $_POST['path_root'];
+	$path_admin 	= empty($_POST['path_admin']) ? 'admin' : $_POST['path_admin'];
+	$path 			= empty($_POST['path']) ? '' : $_POST['path'];
 
 	removeDir('../'.$path_admin.'/img');
 	copyDir('img', '../' . $path_admin . '/img');
@@ -136,6 +136,7 @@ if (!empty($_POST['instalar_projeto'])) {
 
 	installDir($path, $path_admin, '/view');
 	installDir($path, $path_admin, '/controller/config');
+	installDir($path, $path_admin, '/controller/report');
 	installDir($path, $path_admin, '/script');
 
 	installFile($path, $path_admin, '/controller/include.php'			);
@@ -177,6 +178,7 @@ if (!empty($_POST['atualizarOrigemRepo'])) {
 
 	installDir($path_admin, $path, '/view'								, true);
 	installDir($path_admin, $path, '/controller/config'					, true);
+	installDir($path_admin, $path, '/controller/report'					, true);
 	installDir($path_admin, $path, '/script'							, true);
 
 	installFile($path_admin, $path, '/controller/include.php'			, true);
@@ -349,7 +351,7 @@ function replaceResolvFile($path_admin, $path, $file) {
 	if (!is_file('../' . $path_admin . '/' . $path . '/' . $file)) return false;
 
 	$fileCtx = ctxFile('../' . $path_admin . '/' . $path . '/' . $file);
-	$fileCtx = str_replace('resolvConfig.full.js','resolvConfig.min.js',$fileCtx);
+	$fileCtx = str_replace('resolvConfig.full.js','resolvConfig.min.js?' . date('YmdHis') . rand(100,999), $fileCtx);
 	createFile('../' . $path_admin . '/dist/' . $path . '/' . $file, $fileCtx);
 	return true;
 }
